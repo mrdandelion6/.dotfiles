@@ -51,7 +51,6 @@ if [ -n "$force_color_prompt" ]; then
     fi
 fi
 
-# set the prompt to be a blue $
 if [ "$color_prompt" = yes ]; then
     PS1='${debian_chroot:+($debian_chroot)}\[\033[00;31m\]\u@\h\[\033[00m\]:\[\033[01;30m\]\w\[\033[00m\]\$ '
 else
@@ -59,7 +58,7 @@ else
 fi
 unset color_prompt force_color_prompt
 
-# If this is an xterm set the title to user@host:dir
+# if this is an xterm set the title to user@host:dir
 case "$TERM" in
 xterm*|rxvt*)
     PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
@@ -122,8 +121,7 @@ remote_mounts=~/.remote_mounts
 # //==========================================//
 # configure device
 # default configs
-default_win_envdir
-win_envdir="/mnt/c/envs"
+default_win_envdir="/mnt/c/envs"
 case "$(hostname)" in
     "Acer-DK")
         win_envdir="/mnt/d/envs"
@@ -169,13 +167,17 @@ sp : show shell path
 envdir : variable holds path to python environments directory"'
 
 hp() {
+    # truncate path to $
     clear
     export PS1="\[\033[0;36m\]\$ \[\033[0m\]"
 }
 
 sp() {
+    # show full path
     export PS1='${debian_chroot:+($debian_chroot)}\[\033[00;31m\]\u@\h\[\033[00m\]:\[\033[01;30m\]\w\[\033[00m\]\$ '
 }
+
+alias src='source ~/.bashrc'
 # //==========================================//
 # //==========================================//
 #
@@ -422,7 +424,7 @@ ssh_unmount() {
 # latex related files
 latex_meta="$latex_dir/meta.tex" # typical header stuff to add
 latex_build="$latex_dir/build.sh" # build latex in terminal
-chmod u+x latex_build
+chmod -f u+x latex_build
 # //==========================================//
 # //==========================================//
 #
