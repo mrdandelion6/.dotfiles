@@ -300,7 +300,7 @@ pullall() {
 # //==========================================//
 alias python='python3'
 
-envdir=$HOME/envs
+envdir=$HOME/.envs
 
 inenv() { # check if we are in a virtual environment
     if [[ -z "$VIRTUAL_ENV" ]]; then
