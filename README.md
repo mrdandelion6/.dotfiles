@@ -7,7 +7,7 @@ my dotfiles for unix.
 clone this repo in ~
 ```bash
 cd ~
-git clone repo
+git clone repo git@github.com:mrdandelion6/dotfiles.git
 ```
 
 backup current dot files
