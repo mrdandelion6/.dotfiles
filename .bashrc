@@ -467,3 +467,4 @@ export LS_COLORS="$LS_COLORS:ow=1;34:tw=1;34:"
 # anything that needs to be run at the end
 hp
 welcome
+set -o vi # use vim motions
