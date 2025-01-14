@@ -323,7 +323,7 @@ actenv() {
     fi
 }
 
-ppath() {
+pypath() {
     # return the path of the python executable if it exists.
     # checks pyenv directory only
 
@@ -341,7 +341,7 @@ ppath() {
     fi
 }
 
-makenv() {
+mkenv() {
     # create a virtual environment in our linux system
     # $1: name of the environment
     # $2: version of python to use
@@ -352,7 +352,7 @@ makenv() {
         return 1
     fi
 
-    path="$HOME/envs/$1"
+    path="$envdir/$1"
 
     if [ -d "$path" ]; then
         echo "error: environment already exists"
@@ -360,7 +360,8 @@ makenv() {
     fi
 
     if [ -z "$2" ]; then
-        echo "no version specified, using current python version (y) ?"
+        current_version=$(python --version)
+        echo "no version specified, using current python version "$current_version" (y) ?"
         read response
         if [ "$response" == "y" ]; then
             virtualenv "$path"
