@@ -42,8 +42,7 @@ force_color_prompt=yes
 
 if [ -n "$force_color_prompt" ]; then
     if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
-	# we have color support; assume it's compliant with ecma-48
-	# (ISO/IEC-6429). (lack of such support is extremely rare, and such
+	# we have color support; assume it's compliant with ecma-48 (ISO/IEC-6429). (lack of such support is extremely rare, and such
 	# a case would tend to support setf rather than setaf.)
 	color_prompt=yes
     else
