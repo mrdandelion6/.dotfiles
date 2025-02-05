@@ -181,9 +181,19 @@ alias src='source ~/.bashrc'
 # //==========================================//
 #
 # //==========================================//
-# //================- neovim =================//
+# //================= neovim =================//
 # here you find tools and functions related to neovim
 NEOVIM_PATH="$HOME/.config/nvim/"
+
+nvim() {
+    if [[ "$VIRTUAL_ENV" != "neovim" ]]; then
+        if [ -n "$VIRTUAL_ENV" ]; then
+            deactivate
+        fi
+        actenv 'neovim'
+    fi
+    /usr/bin/nvim "$@"
+}
 
 notify_nvim() {
     printf '\033]51;%s\007' $(pwd)
@@ -193,6 +203,46 @@ function cd() {
     builtin cd "$@"
     if [ -n "$NVIM" ]; then
         notify_nvim
+    fi
+}
+# //==========================================//
+# //==========================================//
+#
+# //==========================================//
+# //================== vim ===================//
+# for in terminal vim
+VIM_LOCAL_SETTINGS="$NEOVIM_PATH/.localsettings.json"
+set_vim() {
+    set -o vi
+    colemak_binds=(
+        # lowercase movement keys
+        'k:backward-char'          # h -> k (left)
+        'n:next-history'           # j -> n (down)
+        'e:previous-history'       # k -> e (up)
+        'i:forward-char'          # l -> i (right)
+        # uppercase movement keys
+        'K:backward-word'         # H -> K
+        'N:beginning-of-history'  # J -> N
+        'E:end-of-history'       # K -> E
+        'I:forward-word'         # L -> I
+        # reverse mappings
+        'h:vi-search-again'      # n -> h (find next)
+        'j:vi-end-word'         # e -> j
+        'l:vi-insertion-mode'   # i -> l
+        'H:vi-rev-repeat-search' # N -> H
+        'J:vi-end-word'         # E -> J
+        'L:vi-replace'          # I -> L
+    )
+    if [ -d "$NEOVIM_PATH" ]; then
+        [ ! -f "$VIM_LOCAL_SETTINGS" ] && touch "$VIM_LOCAL_SETTINGS"
+        key_layout=$(jq -r '.layout // empty' "$VIM_LOCAL_SETTINGS")
+        if [[ "$key_layout" == "colemak" ]]; then
+            for binding in "${colemak_binds[@]}"; do
+                bind -m vi-command "$binding"
+            done
+        fi
+    else
+        echo "neovim not set, missing path: $NEOVIM_PATH"
     fi
 }
 # //==========================================//
@@ -252,7 +302,6 @@ welcome() {
     fi
     echo; echo
 }
-
 # //==========================================//
 # //==========================================//
 #
@@ -290,6 +339,9 @@ actenv() {
     if [ -z "$1" ]; then
         echo "error: no environment name provided"
         return 1
+    fi
+    if [ -n "$VIRTUAL_ENV" ]; then
+        echo "in a virtual environment already at: $VIRTUAL_ENV. deactivate first."
     fi
     path="$envdir/$1"
     if [ -d "$path" ]; then
@@ -361,7 +413,7 @@ mkenv() {
                     pyenv install $2
                     virtualenv -p "$python_path/bin/python" "$path"
                     echo "virtual environment created with version $2"
-                else 
+                else
                     echo "rejected"
                     return 0
                 fi
@@ -378,7 +430,7 @@ mkenv() {
 # //================= sshfs ==================//
 # //==========================================//
 ssh_mount() {
-    # create a remote mount 
+    # create a remote mount
     # usage: ssh_mount <user@address:path/to/dir> <mount_name>
     # if <mount_name> doesn't exist in ~/remote-mounts then creates it and starts the mount with sshfs
     mkdir -p ~/remote-mounts/$2
@@ -443,5 +495,5 @@ export LS_COLORS="$LS_COLORS:ow=1;34:tw=1;34:"
 # //==========================================//
 # anything that needs to be run at the end
 hp
+set_vim
 welcome
-set -o vi # use vim motions
