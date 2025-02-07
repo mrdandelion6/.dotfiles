@@ -214,6 +214,8 @@ function cd() {
 VIM_LOCAL_SETTINGS="$NEOVIM_PATH/.localsettings.json"
 set_vim() {
     set -o vi
+    bind -m vi-command -x '"p": CLIP=$(xclip -selection clipboard -o | tr -d "\n\r") && READLINE_LINE="${READLINE_LINE:0:READLINE_POINT}${CLIP}${READLINE_LINE:READLINE_POINT}" && READLINE_POINT=$((READLINE_POINT + ${#CLIP}))'
+    bind -m vi-command -x '"yy": printf "%s" "$READLINE_LINE" | xclip -selection clipboard && printf "%s" "$READLINE_LINE" | xclip -selection primary'
     colemak_binds=(
         # lowercase movement keys
         'k:backward-char'          # h -> k (left)
