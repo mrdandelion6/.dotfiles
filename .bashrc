@@ -192,7 +192,7 @@ nvim() {
         fi
         actenv 'neovim'
     fi
-    /usr/bin/nvim "$@"
+    command nvim "$@"
 }
 
 notify_nvim() {
