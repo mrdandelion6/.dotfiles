@@ -426,6 +426,14 @@ mkenv() {
         fi
     fi
 }
+
+unset_env() {
+    unset VIRTUAL_ENV
+    if [ -n "$PATH" ]; then
+        # remove all the env paths
+        export PATH=$(echo $PATH | tr ':' '\n' | grep -v "/.envs/", | tr '\n' ':' | sed 's/:$//')
+    fi
+}
 # //==========================================//
 # //==========================================//
 #
@@ -497,5 +505,6 @@ export LS_COLORS="$LS_COLORS:ow=1;34:tw=1;34:"
 # //==========================================//
 # anything that needs to be run at the end
 hp
+unset_env
 set_vim
 welcome
