@@ -183,7 +183,7 @@ alias src='source ~/.bashrc'
 # //==========================================//
 # //================= neovim =================//
 # here you find tools and functions related to neovim
-NEOVIM_PATH="$HOME/.config/nvim/"
+NEOVIM_PATH="$HOME/.config/nvim"
 
 nvim() {
     if [[ "$VIRTUAL_ENV" != "neovim" ]]; then
@@ -211,7 +211,7 @@ function cd() {
 # //==========================================//
 # //================== vim ===================//
 # for in terminal vim
-VIM_LOCAL_SETTINGS="$NEOVIM_PATH/.localsettings.json"
+VIM_LOCAL_SETTINGS="${NEOVIM_PATH}/.localsettings.json"
 set_vim() {
     set -o vi
     bind -m vi-command -x '"p": CLIP=$(xclip -selection clipboard -o | tr -d "\n\r") && READLINE_LINE="${READLINE_LINE:0:READLINE_POINT}${CLIP}${READLINE_LINE:READLINE_POINT}" && READLINE_POINT=$((READLINE_POINT + ${#CLIP}))'
@@ -233,7 +233,7 @@ set_vim() {
         'l:vi-insertion-mode'   # i -> l
         'H:vi-rev-repeat-search' # N -> H
         'J:vi-end-word'         # E -> J
-        'L:vi-replace'          # I -> L
+        'L:vi-insert-bol'          # I -> L
     )
     if [ -d "$NEOVIM_PATH" ]; then
         [ ! -f "$VIM_LOCAL_SETTINGS" ] && touch "$VIM_LOCAL_SETTINGS"
@@ -247,13 +247,33 @@ set_vim() {
         echo "neovim not set, missing path: $NEOVIM_PATH"
     fi
 }
+
+setc() {
+    # set the current vim layout to colemak
+    if [ ! -s "$VIM_LOCAL_SETTINGS" ] || ! jq empty "$VIM_LOCAL_SETTINGS" 2>/dev/null; then # file doesn't exist or it contains invalid json
+        echo '{}' > "$VIM_LOCAL_SETTINGS"
+    fi
+    jq '.layout = "colemak"' "$VIM_LOCAL_SETTINGS" > temp.json && mv temp.json "$VIM_LOCAL_SETTINGS"
+    set_vim
+    echo "changed layout to colemak-dh"
+}
+
+setq() {
+    # set the current vim layout to qwerty
+    if [ ! -s "$VIM_LOCAL_SETTINGS" ] || ! jq empty "$VIM_LOCAL_SETTINGS" 2>/dev/null; then # file doesn't exist or it contains invalid json
+        echo '{}' > "$VIM_LOCAL_SETTINGS"
+    fi
+    jq '.layout = "qwerty"' "$VIM_LOCAL_SETTINGS" > temp.json && mv temp.json "$VIM_LOCAL_SETTINGS"
+    set_vim
+    echo "changed layout to qwerty"
+}
 # //==========================================//
 # //==========================================//
 #
 # //================ welcome =================//
 # //==========================================//
 lolc() {
-    # out put an input text with lolcat effect
+    # output an input text with lolcat effect
     local text="$@"
     figlet -f red_phoenix $text | lolcat -S 13
 }
@@ -267,7 +287,7 @@ NC='\e[0m'
 lolcat_enabled=0
 CENTERED_WELCOME=1
 WELCOME_COLOR=$CUSTOM_GRAY
-ascii_path="${NEOVIM_PATH}bash/ascii_art/" # change this to a different location if you want
+ascii_path="${NEOVIM_PATH}/bash/ascii_art/" # change this to a different location if you want
 ascii_art="reaper2.txt"
 
 center_text() {
