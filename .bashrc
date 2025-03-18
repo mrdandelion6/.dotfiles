@@ -214,7 +214,7 @@ function cd() {
 VIM_LOCAL_SETTINGS="${NEOVIM_PATH}/.localsettings.json"
 set_vim() {
     set -o vi
-    bind -m vi-command -x '"p": CLIP=$(xclip -selection clipboard -o | tr -d "\n\r") && READLINE_LINE="${READLINE_LINE:0:READLINE_POINT}${CLIP}${READLINE_LINE:READLINE_POINT}" && READLINE_POINT=$((READLINE_POINT + ${#CLIP}))'
+    bind -m vi-command -x '"p": CLIP=$(xclip -selection clipboard -o | sed -z "s/\r//g; s/\n/\\\\\n/g") && READLINE_LINE="${READLINE_LINE:0:READLINE_POINT+1}${CLIP}${READLINE_LINE:READLINE_POINT+1}" && READLINE_POINT=$((READLINE_POINT + ${#CLIP}))'
     bind -m vi-command -x '"yy": printf "%s" "$READLINE_LINE" | xclip -selection clipboard && printf "%s" "$READLINE_LINE" | xclip -selection primary'
     colemak_binds=(
         # lowercase movement keys
@@ -233,7 +233,7 @@ set_vim() {
         'l:vi-insertion-mode'   # i -> l
         'H:vi-rev-repeat-search' # N -> H
         'J:vi-end-word'         # E -> J
-        'L:vi-insert-bol'          # I -> L
+        'L:vi-replace'          # I -> L
     )
     if [ -d "$NEOVIM_PATH" ]; then
         [ ! -f "$VIM_LOCAL_SETTINGS" ] && touch "$VIM_LOCAL_SETTINGS"
