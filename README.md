@@ -17,13 +17,13 @@ git clone git@github.com:mrdandelion6/dotfiles.git
 backup current dot files
 ```bash
 chmod u+x dotfiles/backup_dotfiles.sh
-./dotfiles/backup_dotfiles.sh
+.dotfiles/backup_dotfiles.sh
 ```
 
 override current dot files with symbolic link
 ```bash
 chmod u+x dotfiles/override_dotfiles.sh
-./dotfiles/override_dotfiles.sh
+.dotfiles/override_dotfiles.sh
 ```
 
 **optional**: if you want to restore everything from `~/backup_dotfiles/`:
