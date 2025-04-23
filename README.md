@@ -11,7 +11,7 @@ this repository allows you to keep a version control over your dotfiles like `.b
 clone this repo in ~
 ```bash
 cd ~
-git clone git@github.com:mrdandelion6/dotfiles.git
+git clone git@github.com:mrdandelion6/.dotfiles.git
 ```
 
 backup current dot files
@@ -28,5 +28,6 @@ chmod u+x dotfiles/override_dotfiles.sh
 
 **optional**: if you want to restore everything from `~/backup_dotfiles/`:
 ```bash
-mv ~/backup_dotfiles/* ~/dotfiles/*
+mv ~/backup_dotfiles/* ~/.dotfiles/
+`./override_dotfiles.sh`
 ```
