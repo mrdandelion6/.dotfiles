@@ -22,8 +22,17 @@ config.colors = {
     }
 }
 
+-- BACKGROUND IMAGE
+local use_background_image = 0 -- toggle this
+local home = os.getenv("HOME")
+local image_path = home .. "/Pictures/backgrounds/dm.png"
+
+if use_background_image == 1 then
+    config.window_background_image = image_path
+else
+    config.window_background_image = ""
+end
 config.window_background_opacity = 1.0
--- config.window_background_image = "C:/same/profiles/term/bg/dm.png"
 
 config.window_background_image_hsb = {
     brightness = 1.0,
