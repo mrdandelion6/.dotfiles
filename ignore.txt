@@ -1,0 +1,3 @@
+# add files here to ignore
+# eg) uncomment the following
+# .config/wezterm/wezterm.lua
