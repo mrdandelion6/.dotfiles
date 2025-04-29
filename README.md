@@ -31,3 +31,8 @@ chmod u+x dotfiles/override_dotfiles.sh
 mv ~/backup_dotfiles/* ~/.dotfiles/
 `./override_dotfiles.sh`
 ```
+
+and if you want to ignore something from being overriden, create a file `ignore.txt` in the root of this repo and add paths to ignore. for example:
+```bash
+~/.config/wezterm/wezterm.lua
+```
