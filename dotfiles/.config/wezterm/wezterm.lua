@@ -6,7 +6,7 @@ if wezterm.config_builder then
   config = wezterm.config_builder()
 end
 
-config.window_decorations = 'INTEGRATED_BUTTONS|TITLE'
+config.window_decorations = 'INTEGRATED_BUTTONS | RESIZE'
 config.enable_tab_bar = true
 
 config.colors = {
@@ -94,7 +94,7 @@ function fullscreen_toggle(window, pane)
     local overrides = window:get_config_overrides() or {}
     local is_fullscreen = window:get_dimensions().is_full_screen
     overrides.window_decorations = 'NONE'
-    
+
     if is_fullscreen then
         overrides.enable_tab_bar = false
         wezterm.sleep_ms(10)
@@ -102,7 +102,7 @@ function fullscreen_toggle(window, pane)
     else
         overrides.enable_tab_bar = true
     end
-    
+
     window:set_config_overrides(overrides)
 end
 
