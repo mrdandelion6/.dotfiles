@@ -214,3 +214,8 @@ set confirm
 autocmd TerminalOpen * set bufhidden=hide
 " double escape to exit terminal mode to normal mode
 tnoremap <Esc><Esc> <C-\><C-n>
+
+" ====== WAYLAND =====
+" for arch linux wayland
+command! WlPaste execute 'normal! i' . system('wl-paste --no-newline')
+nnoremap <Leader>p :WlPaste<CR>
