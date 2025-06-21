@@ -21,7 +21,7 @@ highlight SpecialKey ctermfg=7 guifg=#c0c0c0
 " ===== COLEMAK LAYOUT SUPPORT =====
 let g:current_layout = 'qwerty'
 " path to the local settings file
-let g:settings_file = expand('~/AppData/Local/nvim/.localsettings.json')
+let g:settings_file = expand('~/.config/nvim/.localsettings.json')
 
 " function to read layout from json settings file
 function! ReadLayout()
@@ -205,7 +205,7 @@ if has('win32') || has('win64')
     set shellquote=\"
     set shellxquote=
 endif
-" override :term to open vertical terminal with powershell
+" override :term to open vertical terminal
 command! -nargs=* Term :botright vertical terminal <args>
 cnoreabbrev term Term
 
