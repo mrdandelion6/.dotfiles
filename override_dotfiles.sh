@@ -4,18 +4,20 @@ find ~/.dotfiles/dotfiles -type f | while read -r dotfile; do
   rel_path=${dotfile#~/.dotfiles/dotfiles/}
 
   # check if rel_path is in ignored.txt (skipping commented lines)
-  is_ignored=0
-  while IFS= read -r ignore_pattern || [ -n "$ignore_pattern" ]; do
-    # skip empty lines and comments
-    [[ -z "$ignore_pattern" || "$ignore_pattern" =~ ^[[:space:]]*# ]] && continue
+  if [ -f ~/.dotfiles/ignore.txt ]; then
+      is_ignored=0
+      while IFS= read -r ignore_pattern || [ -n "$ignore_pattern" ]; do
+        # skip empty lines and comments
+        [[ -z "$ignore_pattern" || "$ignore_pattern" =~ ^[[:space:]]*# ]] && continue
 
-    # check if rel_path matches the pattern
-    if [[ "$rel_path" == "$ignore_pattern" ]]; then
-      is_ignored=1
-      echo "Ignoring: $rel_path (matched pattern: $ignore_pattern)"
-      break
-    fi
-  done < ignore.txt
+        # check if rel_path matches the pattern
+        if [[ "$rel_path" == "$ignore_pattern" ]]; then
+          is_ignored=1
+          echo "Ignoring: $rel_path (matched pattern: $ignore_pattern)"
+          break
+        fi
+      done < ignore.txt
+  fi
 
   # skip this file if it's in the ignore list
   [[ $is_ignored -eq 1 ]] && continue
