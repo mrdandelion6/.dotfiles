@@ -46,7 +46,7 @@
         },
         {
             "type": "custom",
-            "format": " {##82b3fb}  {##94b2fb}  {##a6b2fc}  {##b8b2fd}  {##cab1fd}  {##dbb1fe}  {##edb0fe}  {##ffb0ff}  {##f8a6ec}  {##f29dd9}     {##eb93c7}  {##e58ab4}  {##de80a1}  {##e38b99}  {##e79591}  {##eca089}  {##f0aa81}  {##f5b579}  {##fac071}  {##feca69}"
+            "format": " {##82b3fb}  {##94b2fb}  {##a6b2fc}  {##b8b2fd}  {##cab1fd}  {##dbb1fe}  {##edb0fe}  {##ffb0ff}  {##f8a6ec}  {##f29dd9}     {##eb93c7}  {##e58ab4}  {##de80a1}  {##e88b99}  {##ea9294}  {##ec998e}  {##efa089}  {##f1a784}  {##f3ae7e}  {##f5b579}"
         },
         {
             "type": "custom",
@@ -187,7 +187,7 @@
         "break",
         {
             "type": "custom",
-            "format": " {##feca69}  {##fac071}  {##f5b579}  {##f0aa81}  {##eca089}  {##e79591}  {##e38b99}  {##de80a1}  {##e58ab4}  {##eb93c7}     {##f29dd9}  {##f8a6ec}  {##ffb0ff}  {##edb0fe}  {##dbb1fe}  {##cab1fd}  {##b8b2fd}  {##a6b2fc}  {##94b2fb}  {##82b3fb}"
+            "format": " {##f5b579}  {##f3ae7e}  {##f1a784}  {##efa089}  {##ec998e}  {##ea9294}  {##e88b99}  {##de80a1}  {##e58ab4}  {##eb93c7}     {##f29dd9}  {##f8a6ec}  {##ffb0ff}  {##edb0fe}  {##dbb1fe}  {##cab1fd}  {##b8b2fd}  {##a6b2fc}  {##94b2fb}  {##82b3fb}"
         }
     ]
 }
