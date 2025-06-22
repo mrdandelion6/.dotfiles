@@ -63,3 +63,6 @@ git clone https://github.com/mrdandelion6/faisal.nvim.git
 note that you obviously don't need to get neovim but you'll have to edit `~/.bashrc` to remove some echo messages when neovim isn't found.
 
 i use the .localsettings.json found in my [neovim repository](https://github.com/mrdandelion6/faisal.nvim#) for keeping track of whether i'm using colemak-dh or qwerty layout.
+
+## todo
+- send signal to nvim on term spawn , not just cd
