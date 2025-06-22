@@ -5,7 +5,7 @@
 # if not running interactively, don't do anything
 case $- in
     *i*) ;;
-      *) return;;
+    *) return;;
 esac
 
 # //================ history =================//
@@ -42,11 +42,11 @@ force_color_prompt=yes
 
 if [ -n "$force_color_prompt" ]; then
     if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
-	# we have color support; assume it's compliant with ecma-48 (ISO/IEC-6429). (lack of such support is extremely rare, and such
-	# a case would tend to support setf rather than setaf.)
-	color_prompt=yes
+        # we have color support; assume it's compliant with ecma-48 (ISO/IEC-6429). (lack of such support is extremely rare, and such
+        # a case would tend to support setf rather than setaf.)
+        color_prompt=yes
     else
-	color_prompt=
+        color_prompt=
     fi
 fi
 
@@ -59,11 +59,11 @@ unset color_prompt force_color_prompt
 
 # if this is an xterm set the title to user@host:dir
 case "$TERM" in
-xterm*|rxvt*)
-    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
-    ;;
-*)
-    ;;
+    xterm*|rxvt*)
+        PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
+        ;;
+    *)
+        ;;
 esac
 
 # enable color support of ls and also add handy aliases
@@ -97,11 +97,11 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
 # sources /etc/bash.bashrc).
 if ! shopt -oq posix; then
-  if [ -f /usr/share/bash-completion/bash_completion ]; then
-    . /usr/share/bash-completion/bash_completion
-  elif [ -f /etc/bash_completion ]; then
-    . /etc/bash_completion
-  fi
+    if [ -f /usr/share/bash-completion/bash_completion ]; then
+        . /usr/share/bash-completion/bash_completion
+    elif [ -f /etc/bash_completion ]; then
+        . /etc/bash_completion
+    fi
 fi
 # //==========================================//
 # //==========================================//
@@ -128,12 +128,20 @@ case "$(hostname)" in
     "FS-Laptop")
         win_envdir=$default_win_envidir
         ;;
+    "potato")
+        win_envdir="/mnt/hdd2/envs"
+        ;;
     *)
         # default case if no match
         echo ".bashrc does not recognize this device name: $(hostname). using default configurations."
         win_envdir=$default_win_envdir
         ;;
 esac
+if grep -q "^ID=arch" /etc/os-release 2>/dev/null; then
+    is_arch=true
+else
+    is_arch=false
+fi
 # //==========================================//
 # //==========================================//
 #
@@ -222,8 +230,13 @@ function sudo() {
 VIM_LOCAL_SETTINGS="${NEOVIM_PATH}/.localsettings.json"
 set_vim() {
     set -o vi
-    bind -m vi-command -x '"p": CLIP=$(xclip -selection clipboard -o | sed -z "s/\r//g; s/\n/\\\\\n/g") && READLINE_LINE="${READLINE_LINE:0:READLINE_POINT+1}${CLIP}${READLINE_LINE:READLINE_POINT+1}" && READLINE_POINT=$((READLINE_POINT + ${#CLIP}))'
-    bind -m vi-command -x '"yy": printf "%s" "$READLINE_LINE" | xclip -selection clipboard && printf "%s" "$READLINE_LINE" | xclip -selection primary'
+    if [ "$is_arch" = true ]; then
+        bind -m vi-command -x '"p": CLIP=$(wl-paste | sed -z "s/\r//g; s/\n/\\\\\n/g") && READLINE_LINE="${READLINE_LINE:0:READLINE_POINT+1}${CLIP}${READLINE_LINE:READLINE_POINT+1}" && READLINE_POINT=$((READLINE_POINT + ${#CLIP}))'
+        bind -m vi-command -x '"yy": printf "%s" "$READLINE_LINE" | wl-copy'
+    else
+        bind -m vi-command -x '"p": CLIP=$(xclip -selection clipboard -o | sed -z "s/\r//g; s/\n/\\\\\n/g") && READLINE_LINE="${READLINE_LINE:0:READLINE_POINT+1}${CLIP}${READLINE_LINE:READLINE_POINT+1}" && READLINE_POINT=$((READLINE_POINT + ${#CLIP}))'
+        bind -m vi-command -x '"yy": printf "%s" "$READLINE_LINE" | xclip -selection clipboard && printf "%s" "$READLINE_LINE" | xclip -selection primary'
+    fi
     colemak_binds=(
         # lowercase movement keys
         'k:backward-char'          # h -> k (left)
@@ -291,7 +304,7 @@ NC='\e[0m'
 # configure these as you like
 CENTERED_WELCOME=1
 WELCOME_COLOR=$CUSTOM_GRAY
-ascii_path="${NEOVIM_PATH}/bash/ascii_art/" # change this to a different location if you want
+ascii_path="$HOME/.dotfiles/ascii_art/" # change this to a different location if you want
 ascii_art="reaper2.txt"
 
 center_text() {
@@ -310,15 +323,17 @@ center_text() {
         plain_line=$(echo -e "$line" | sed 's/\x1b\[[0-9;]*m//g')
         # calculate padding
         padding=$(( (term_width - ${#plain_line}) / 2 ))
-        # add padding before the line
-        printf "%${padding}s%s\n" "" "$line"
-    done
-}
+            # add padding before the line
+            printf "%${padding}s%s\n" "" "$line"
+        done
+    }
 
 welcome() {
     echo; echo
-    if [ -f "$ascii_path$ascii_art" ]; then
-	echo -e "${WELCOME_COLOR}$(cat "$ascii_path$ascii_art")${NC}" | center_text
+    if [ "$is_arch" = true ]; then
+        fastfetch
+    elif [ -f "$ascii_path$ascii_art" ]; then
+        echo -e "${WELCOME_COLOR}$(cat "$ascii_path$ascii_art")${NC}" | center_text
     fi
     echo; echo
 }
@@ -468,9 +483,9 @@ ssh_mount() {
 ssh_unmount() {
     # unmount a mounted ssh filesystem
     if [ ! -d ~/remote-mounts/$1 ]; then
-	echo "no such folder ~/remote-mounts/$1"
+        echo "no such folder ~/remote-mounts/$1"
     else
-	fusermount -u ~/remote-mounts/$1
+        fusermount -u ~/remote-mounts/$1
     fi
 }
 # //==========================================//
@@ -503,7 +518,7 @@ export NVM_DIR="$HOME/.nvm"
 export PYENV_ROOT="$HOME/.pyenv"
 export PATH="$PYENV_ROOT/bin:$PATH"
 if command -v pyenv 1>/dev/null 2>&1; then
-  eval "$(pyenv init -)"
+    eval "$(pyenv init -)"
 fi
 
 # cuda
@@ -518,7 +533,9 @@ export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
 export LS_COLORS="$LS_COLORS:ow=1;34:tw=1;34:"
 
 # rust
-. "$HOME/.cargo/env" # sourcing this adds .cargo/bin to path and other things
+if [ -f "$HOME/.cargo/env" ]; then
+    . "$HOME/.cargo/env" # sourcing this adds .cargo/bin to path and other things
+fi
 # //==========================================//
 # //==========================================//
 #
