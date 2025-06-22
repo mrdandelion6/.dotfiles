@@ -25,7 +25,7 @@ config.colors = {
 -- BACKGROUND IMAGE
 local use_background_image = 0 -- toggle this
 local home = os.getenv("HOME")
-local image_path = home .. "/Pictures/backgrounds/dm.png"
+local image_path = home .. ".dotfiles/images/dark_mountain.png"
 
 if use_background_image == 1 then
     config.window_background_image = image_path
