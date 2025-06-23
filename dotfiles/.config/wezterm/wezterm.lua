@@ -51,6 +51,8 @@ config.font = wezterm.font("3270 Nerd Font", { weight = 400 })
 config.font_size = 13.0
 config.font_rasterizer = "FreeType"
 config.freetype_render_target = "HorizontalLcd"
+config.initial_cols = 105
+config.initial_rows = 34
 
 config.window_frame = {
     active_titlebar_bg = "#ffffff",
