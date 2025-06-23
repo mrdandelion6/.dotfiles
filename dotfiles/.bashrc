@@ -121,6 +121,7 @@ remote_mounts=~/.remote_mounts
 # configure device
 # default configs
 default_win_envdir="/mnt/c/envs"
+envdir=$HOME/.envs
 case "$(hostname)" in
     "Acer-DK")
         win_envdir="/mnt/d/envs"
@@ -128,8 +129,9 @@ case "$(hostname)" in
     "FS-Laptop")
         win_envdir=$default_win_envidir
         ;;
-    "potato")
-        win_envdir="/mnt/hdd2/envs"
+    "potato") # no windows envdir , not using wsl (arch desktop)
+        envdir="/mnt/hdd2/envs"
+        win_envdir=""
         ;;
     *)
         # default case if no match
@@ -198,28 +200,23 @@ nvim() {
         if [ -n "$VIRTUAL_ENV" ]; then
             deactivate
         fi
-        actenv 'neovim'
+        if [ -f "$envdir/neovim" ]; then
+            actenv 'neovim'
+        fi
     fi
     command nvim "$@"
 }
 
 notify_nvim() {
-    printf '\033]51;%s\007' $(pwd)
+    # send specific signal to neovim if this terminal is spawned inside it
+    if [ -n "$NVIM" ]; then
+        printf '\033]51;%s\007' $(pwd)
+    fi
 }
 
 function cd() {
     builtin cd "$@"
-    if [ -n "$NVIM" ]; then
-        notify_nvim
-    fi
-}
-
-function sudo() {
-    if [[ "$1" == "vi" ]]; then
-        command sudo vim "${@:2}"
-    else
-        command sudo "$@"
-    fi
+    notify_nvim
 }
 # //==========================================//
 # //==========================================//
@@ -289,6 +286,14 @@ setq() {
     echo "changed layout to qwerty"
 }
 
+function sudo() {
+    if [[ "$1" == "vi" ]]; then
+        command sudo vim "${@:2}"
+    else
+        command sudo "$@"
+    fi
+}
+
 alias vi='vim'
 # //==========================================//
 # //==========================================//
@@ -304,9 +309,12 @@ NC='\e[0m'
 # configure these as you like
 CENTERED_WELCOME=1
 WELCOME_COLOR=$CUSTOM_GRAY
-ascii_path="$HOME/.dotfiles/ascii_art/" # change this to a different location if you want
-ascii_art="reaper2.txt"
 
+ # change this to a different location if you want
+ ascii_path="$HOME/.dotfiles/ascii_art/"
+ ascii_art="reaper2.txt"
+
+# function that prints given text centered in the terminal for whatever width.
 center_text() {
     local should_center=$CENTERED_WELCOME
 
@@ -328,6 +336,7 @@ center_text() {
         done
     }
 
+# print the welcome message , whether fastfetch or ascii art
 welcome() {
     echo; echo
     if [ "$is_arch" = true ]; then
@@ -360,7 +369,6 @@ pullall() {
 # //==========================================//
 alias python='python3'
 
-envdir=$HOME/.envs
 
 inenv() { # check if we are in a virtual environment
     if [[ -z "$VIRTUAL_ENV" ]]; then
@@ -546,3 +554,4 @@ hp
 unset_env
 set_vim
 welcome
+notify_nvim
