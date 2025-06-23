@@ -200,7 +200,7 @@ nvim() {
         if [ -n "$VIRTUAL_ENV" ]; then
             deactivate
         fi
-        if [ -f "$envdir/neovim" ]; then
+        if [ -d "$envdir/neovim" ]; then
             actenv 'neovim'
         fi
     fi
@@ -229,10 +229,10 @@ set_vim() {
     set -o vi
     if [ "$is_arch" = true ]; then
         bind -m vi-command -x '"p": CLIP=$(wl-paste | sed -z "s/\r//g; s/\n/\\\\\n/g") && READLINE_LINE="${READLINE_LINE:0:READLINE_POINT+1}${CLIP}${READLINE_LINE:READLINE_POINT+1}" && READLINE_POINT=$((READLINE_POINT + ${#CLIP}))'
-        bind -m vi-command -x '"yy": printf "%s" "$READLINE_LINE" | wl-copy'
-    else
-        bind -m vi-command -x '"p": CLIP=$(xclip -selection clipboard -o | sed -z "s/\r//g; s/\n/\\\\\n/g") && READLINE_LINE="${READLINE_LINE:0:READLINE_POINT+1}${CLIP}${READLINE_LINE:READLINE_POINT+1}" && READLINE_POINT=$((READLINE_POINT + ${#CLIP}))'
-        bind -m vi-command -x '"yy": printf "%s" "$READLINE_LINE" | xclip -selection clipboard && printf "%s" "$READLINE_LINE" | xclip -selection primary'
+            bind -m vi-command -x '"yy": printf "%s" "$READLINE_LINE" | wl-copy'
+        else
+            bind -m vi-command -x '"p": CLIP=$(xclip -selection clipboard -o | sed -z "s/\r//g; s/\n/\\\\\n/g") && READLINE_LINE="${READLINE_LINE:0:READLINE_POINT+1}${CLIP}${READLINE_LINE:READLINE_POINT+1}" && READLINE_POINT=$((READLINE_POINT + ${#CLIP}))'
+                bind -m vi-command -x '"yy": printf "%s" "$READLINE_LINE" | xclip -selection clipboard && printf "%s" "$READLINE_LINE" | xclip -selection primary'
     fi
     colemak_binds=(
         # lowercase movement keys
