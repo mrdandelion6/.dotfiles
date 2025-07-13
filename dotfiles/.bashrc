@@ -229,10 +229,10 @@ set_vim() {
     set -o vi
     if [ "$is_arch" = true ]; then
         bind -m vi-command -x '"p": CLIP=$(wl-paste | sed -z "s/\r//g; s/\n/\\\\\n/g") && READLINE_LINE="${READLINE_LINE:0:READLINE_POINT+1}${CLIP}${READLINE_LINE:READLINE_POINT+1}" && READLINE_POINT=$((READLINE_POINT + ${#CLIP}))'
-            bind -m vi-command -x '"yy": printf "%s" "$READLINE_LINE" | wl-copy'
-        else
-            bind -m vi-command -x '"p": CLIP=$(xclip -selection clipboard -o | sed -z "s/\r//g; s/\n/\\\\\n/g") && READLINE_LINE="${READLINE_LINE:0:READLINE_POINT+1}${CLIP}${READLINE_LINE:READLINE_POINT+1}" && READLINE_POINT=$((READLINE_POINT + ${#CLIP}))'
-                bind -m vi-command -x '"yy": printf "%s" "$READLINE_LINE" | xclip -selection clipboard && printf "%s" "$READLINE_LINE" | xclip -selection primary'
+        bind -m vi-command -x '"yy": printf "%s" "$READLINE_LINE" | wl-copy'
+    else
+        bind -m vi-command -x '"p": CLIP=$(xclip -selection clipboard -o | sed -z "s/\r//g; s/\n/\\\\\n/g") && READLINE_LINE="${READLINE_LINE:0:READLINE_POINT+1}${CLIP}${READLINE_LINE:READLINE_POINT+1}" && READLINE_POINT=$((READLINE_POINT + ${#CLIP}))'
+        bind -m vi-command -x '"yy": printf "%s" "$READLINE_LINE" | xclip -selection clipboard && printf "%s" "$READLINE_LINE" | xclip -selection primary'
     fi
     colemak_binds=(
         # lowercase movement keys
@@ -511,6 +511,11 @@ chmod -f u+x latex_build
 # //================== path ==================//
 # //==========================================//
 # stuff that needs to be added to path
+
+remove_path_duplicates() {
+    export PATH=$(echo "$PATH" | tr ':' '\n' | awk '!seen[$0]++' | tr '\n' ':' | sed 's/:$//')
+}
+
 # bin
 export PATH=/usr/bin:$PATH
 
@@ -534,8 +539,8 @@ export PATH=/usr/local/cuda-11.8/bin${PATH:+:${PATH}}
 export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
 
 # go
-export GOPATH=$HOME/go
-export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+export GOPATH="$HOME/go"
+export PATH="$PATH:$GOPATH/bin"
 
 # colors
 export LS_COLORS="$LS_COLORS:ow=1;34:tw=1;34:"
@@ -553,5 +558,6 @@ fi
 hp
 unset_env
 set_vim
+remove_path_duplicates
 welcome
 notify_nvim
