@@ -39,7 +39,7 @@ and if you want to ignore something from being overriden, create a file `ignore.
 some deps
 ```bash
 # general
-pacman -S jq gvim inetutils
+pacman -S jq gvim inetutils pv
 
 # for python mkenv utilities
 pacman -S python python-pip pyenv

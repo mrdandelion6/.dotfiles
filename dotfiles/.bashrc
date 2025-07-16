@@ -206,6 +206,96 @@ exfat-mount() {
 
     sudo mount -t exfat -o uid=$(id -u),gid=$(id -g) "$1" "$2"
 }
+
+tar_all_dirs() {
+    local source_dir="$1"
+    local dest_dir="$2"
+
+    # check if both arguments are provided
+    if [ -z "$source_dir" ] || [ -z "$dest_dir" ]; then
+        echo "Usage: tar_all_dirs <source_directory> <destination_directory>"
+        echo "Example: tar_all_dirs /mnt/root-btrfs/snapshots /mnt/usb/backup_dir/"
+        return 1
+    fi
+
+    # check if source directory exists
+    if [ ! -d "$source_dir" ]; then
+        echo "Error: Source directory $source_dir does not exist"
+        return 1
+    fi
+
+    # create destination directory if it doesn't exist
+    mkdir -p "$dest_dir"
+
+    # check if destination directory was created successfully
+    if [ ! -d "$dest_dir" ]; then
+        echo "Error: Cannot create or access destination directory $dest_dir"
+        return 1
+    fi
+
+    # find all directories in source and store in array
+    dirs_to_zip=()
+    while IFS= read -r -d '' dir; do
+        dirs_to_zip+=("$(basename "$dir")")
+    done < <(find "$source_dir" -maxdepth 1 -type d -not -path "$source_dir" -print0)
+
+    # check if any directories were found
+    if [ ${#dirs_to_zip[@]} -eq 0 ]; then
+        echo "No directories found in $source_dir"
+        return 1
+    fi
+
+    # display directories that will be zipped
+    echo "Found ${#dirs_to_zip[@]} directories to zip:"
+    echo "----------------------------------------"
+    for dir_name in "${dirs_to_zip[@]}"; do
+        echo "  • $dir_name"
+    done
+    echo "----------------------------------------"
+    echo "Source: $source_dir"
+    echo "Destination: $dest_dir"
+    echo ""
+
+    # ask for confirmation
+    read -p "Do you want to proceed with zipping these directories? (y/N): " -n 1 -r
+    echo    # move to a new line
+
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "Operation cancelled."
+        return 0
+    fi
+
+    echo ""
+    echo "Starting to zip directories..."
+    echo "----------------------------------------"
+
+    # loop through each directory and create tar.gz
+    for dir_name in "${dirs_to_zip[@]}"; do
+        echo "Zipping: $dir_name"
+
+        # create tar.gz with same name as the directory (with progress bar)
+        sudo tar -czf - -C "$source_dir/$dir_name" . | pv > "$dest_dir/${dir_name}.tar.gz"
+
+        # check if tar command was successful
+        if [ $? -eq 0 ]; then
+            echo "  ✓ Successfully created ${dir_name}.tar.gz"
+        else
+            echo "  ✗ Failed to create ${dir_name}.tar.gz"
+        fi
+        echo ""
+    done
+
+    echo "----------------------------------------"
+    echo "Zipping completed!"
+    echo "Files saved to: $dest_dir"
+}
+# //==========================================//
+# //==========================================//
+#
+# //==========================================//
+# //================= btrfs ==================//
+# some btrfs file system utilities
+
 # //==========================================//
 # //==========================================//
 #
