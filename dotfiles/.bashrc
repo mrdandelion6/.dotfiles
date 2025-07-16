@@ -286,9 +286,13 @@ setq() {
     echo "changed layout to qwerty"
 }
 
+# WARNING: this function is dangerous because it will not use root's .vimrc
+# make sure that is what you want!
 function sudo() {
     if [[ "$1" == "vi" ]]; then
-        command sudo vim "${@:2}"
+        command sudo -E vim "${@:2}"
+    elif [[ "$1" == "-E" && "$2" == "vi" ]]; then
+        command sudo -E vim "${@:3}"
     else
         command sudo "$@"
     fi
