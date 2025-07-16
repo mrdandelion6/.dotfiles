@@ -289,7 +289,7 @@ setq() {
 # WARNING: this function is dangerous because it will not use root's .vimrc
 # make sure that is what you want!
 function sudo() {
-    if [[ "$1" == "vi" ]]; then
+    if [[ "$1" == "vi" || "$1" == "vim" ]]; then
         command sudo -E vim "${@:2}"
     elif [[ "$1" == "-E" && "$2" == "vi" ]]; then
         command sudo -E vim "${@:3}"
