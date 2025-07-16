@@ -187,6 +187,25 @@ sp() {
 }
 
 alias src='source ~/.bashrc'
+
+exfat-mount() {
+    if [ $# -ne 2 ]; then
+        echo "usage: exfat-mount /dev/sdXY /mnt/destination"
+        return 1
+    fi
+
+    if [ ! -e "$1" ]; then
+        echo "device: $1 doesn't exist"
+        return 1
+    fi
+
+    if [ ! -d "$2" ]; then
+        echo "path: $2 doesn't exist"
+        return 1
+    fi
+
+    sudo mount -t exfat -o uid=$(id -u),gid=$(id -g) "$1" "$2"
+}
 # //==========================================//
 # //==========================================//
 #
