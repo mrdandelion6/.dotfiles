@@ -43,7 +43,7 @@ pacman -S jq gvim inetutils pv
 
 # for python mkenv utilities
 pacman -S python python-pip pyenv
-pip install virtualenv
+pip install --break-system-packages virtualenv
 
 # remote mounting
 pacman -S sshfs fusermount
