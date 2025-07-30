@@ -188,6 +188,10 @@ sp() {
 
 alias src='source ~/.bashrc'
 
+format-mount() {
+    sudo mount -t "$3" -o uid=$(id -u),gid=$(id -g) "$1" "$2"
+}
+
 exfat-mount() {
     if [ $# -ne 2 ]; then
         echo "usage: exfat-mount /dev/sdXY /mnt/destination"
@@ -204,7 +208,26 @@ exfat-mount() {
         return 1
     fi
 
-    sudo mount -t exfat -o uid=$(id -u),gid=$(id -g) "$1" "$2"
+    format-mount "$1" "$2" "exfat"
+}
+
+fat32-mount() {
+    if [ $# -ne 2 ]; then
+        echo "usage: fat32-mount /dev/sdXY /mnt/destination"
+        return 1
+    fi
+
+    if [ ! -e "$1" ]; then
+        echo "device: $1 doesn't exist"
+        return 1
+    fi
+
+    if [ ! -d "$2" ]; then
+        echo "path: $2 doesn't exist"
+        return 1
+    fi
+
+    format-mount "$1" "$2" "vfat"
 }
 
 tar_all_dirs() {
