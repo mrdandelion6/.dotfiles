@@ -120,23 +120,18 @@ remote_mounts=~/.remote_mounts
 # //==========================================//
 # configure device
 # default configs
-default_win_envdir="/mnt/c/envs"
 envdir=$HOME/.envs
 case "$(hostname)" in
-    "Acer-DK")
-        win_envdir="/mnt/d/envs"
+    "Acer-DK") # wsl pc
+        envdir="/mnt/hdd1/.envs/arch"
         ;;
-    "FS-Laptop")
-        win_envdir=$default_win_envidir
+    "potato") # arch pc
+        envdir="/mnt/hdd1/.envs/arch"
         ;;
-    "potato") # no windows envdir , not using wsl (arch desktop)
-        envdir="/mnt/hdd2/envs"
-        win_envdir=""
+    "FS-Laptop") # wsl laptop
+        envdir="/mnt/win/.envs/arch"
         ;;
     *)
-        # default case if no match
-        echo ".bashrc does not recognize this device name: $(hostname). using default configurations."
-        win_envdir=$default_win_envdir
         ;;
 esac
 if grep -q "^ID=arch" /etc/os-release 2>/dev/null; then
