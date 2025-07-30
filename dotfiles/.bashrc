@@ -155,20 +155,49 @@ shopt -s checkwinsize
 shopt -s globstar
 
 # alias that shows my custom functions
-alias als='echo "als : list custom alias and functions
-ls : ls-lah
-gin : gcc -w -o notes notes.c
-ginc : rm notes main a.out notes.exe main.exe
-bash_ref : . ~/.bashrc
-bash_pull : cp ~/.bashrc
-bash_push : push .bashrc from pwd to ~
-lc <text> : print cool text
-welcome : print welcome message
-pushall : push to all repos
-pullall : pull from all repos
-hp : hide shell path
-sp : show shell path
-envdir : variable holds path to python environments directory"'
+alias als='echo "=== CUSTOM ALIASES ===
+als        : list all custom functions, aliases, and variables
+src        : source ~/.bashrc
+vi         : alias for vim
+python     : alias for python3
+alert      : notify when long command finishes
+
+=== DISPLAY & NAVIGATION ===
+hp         : hide shell path (show only $)
+sp         : show full shell path
+welcome    : print welcome message with ascii art/fastfetch
+
+=== GIT FUNCTIONS ===
+pushall    : push to all git remotes
+pullall    : pull from all git remotes
+
+=== PYTHON ENVIRONMENT ===
+inenv      : check if in virtual environment
+actenv     : activate virtual environment (usage: actenv <name>)
+mkenv      : create new virtual environment (usage: mkenv <name> [python_version])
+unset_env  : unset virtual environment variables
+pypath     : get path to pyenv python version (usage: pypath <version>)
+
+=== VIM/NEOVIM ===
+setc       : set vim keybindings to colemak layout
+setq       : set vim keybindings to qwerty layout
+set_vim    : configure vim mode with clipboard integration
+nvim       : launch neovim with proper environment
+
+=== MOUNTING & FILE SYSTEMS ===
+format-mount    : mount with user permissions (usage: format-mount <device> <path> <type>)
+exfat-mount     : mount exfat filesystem (usage: exfat-mount <device> <path>)
+fat32-mount     : mount fat32 filesystem (usage: fat32-mount <device> <path>)
+tar_all_dirs    : tar all directories in source to destination
+ssh_mount       : mount remote directory via sshfs (usage: ssh_mount <user@host:path> <name>)
+ssh_unmount     : unmount sshfs directory (usage: ssh_unmount <name>)
+
+=== IMPORTANT VARIABLES ===
+envdir          : path to python virtual environments
+NEOVIM_PATH     : path to neovim configuration
+latex_dir       : path to latex files
+remote_mounts   : path to remote mount points
+is_arch         : boolean indicating if running on Arch Linux"'
 
 hp() {
     # truncate path to $
