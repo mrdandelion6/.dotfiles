@@ -265,48 +265,48 @@ tar_all_dirs() {
 
     # display directories that will be zipped
     echo "Found ${#dirs_to_zip[@]} directories to zip:"
-    echo "----------------------------------------"
-    for dir_name in "${dirs_to_zip[@]}"; do
-        echo "  • $dir_name"
-    done
-    echo "----------------------------------------"
-    echo "Source: $source_dir"
-    echo "Destination: $dest_dir"
-    echo ""
-
-    # ask for confirmation
-    read -p "Do you want to proceed with zipping these directories? (y/N): " -n 1 -r
-    echo    # move to a new line
-
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo "Operation cancelled."
-        return 0
-    fi
-
-    echo ""
-    echo "Starting to zip directories..."
-    echo "----------------------------------------"
-
-    # loop through each directory and create tar.gz
-    for dir_name in "${dirs_to_zip[@]}"; do
-        echo "Zipping: $dir_name"
-
-        # create tar.gz with same name as the directory (with progress bar)
-        sudo tar -czf - -C "$source_dir/$dir_name" . | pv > "$dest_dir/${dir_name}.tar.gz"
-
-        # check if tar command was successful
-        if [ $? -eq 0 ]; then
-            echo "  ✓ Successfully created ${dir_name}.tar.gz"
-        else
-            echo "  ✗ Failed to create ${dir_name}.tar.gz"
-        fi
+        echo "----------------------------------------"
+        for dir_name in "${dirs_to_zip[@]}"; do
+            echo "  • $dir_name"
+        done
+        echo "----------------------------------------"
+        echo "Source: $source_dir"
+        echo "Destination: $dest_dir"
         echo ""
-    done
 
-    echo "----------------------------------------"
-    echo "Zipping completed!"
-    echo "Files saved to: $dest_dir"
-}
+        # ask for confirmation
+        read -p "Do you want to proceed with zipping these directories? (y/N): " -n 1 -r
+        echo    # move to a new line
+
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            echo "Operation cancelled."
+            return 0
+        fi
+
+        echo ""
+        echo "Starting to zip directories..."
+        echo "----------------------------------------"
+
+        # loop through each directory and create tar.gz
+        for dir_name in "${dirs_to_zip[@]}"; do
+            echo "Zipping: $dir_name"
+
+            # create tar.gz with same name as the directory (with progress bar)
+            sudo tar -czf - -C "$source_dir/$dir_name" . | pv > "$dest_dir/${dir_name}.tar.gz"
+
+            # check if tar command was successful
+            if [ $? -eq 0 ]; then
+                echo "  ✓ Successfully created ${dir_name}.tar.gz"
+            else
+                echo "  ✗ Failed to create ${dir_name}.tar.gz"
+            fi
+            echo ""
+        done
+
+        echo "----------------------------------------"
+        echo "Zipping completed!"
+        echo "Files saved to: $dest_dir"
+    }
 # //==========================================//
 # //==========================================//
 #
