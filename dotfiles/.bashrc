@@ -106,16 +106,6 @@ fi
 # //==========================================//
 # //==========================================//
 #
-# //================ dotfiles ================//
-# //==========================================//
-# latex
-latex_dir=~/.latex
-
-# remote mounts
-remote_mounts=~/.remote_mounts
-# //==========================================//
-# //==========================================//
-#
 # //============ configure device ============//
 # //==========================================//
 # configure device
@@ -195,8 +185,6 @@ ssh_unmount     : unmount sshfs directory (usage: ssh_unmount <name>)
 === IMPORTANT VARIABLES ===
 envdir          : path to python virtual environments
 NEOVIM_PATH     : path to neovim configuration
-latex_dir       : path to latex files
-remote_mounts   : path to remote mount points
 is_arch         : boolean indicating if running on Arch Linux"'
 
 hp() {
@@ -384,7 +372,7 @@ VIM_LOCAL_SETTINGS="${NEOVIM_PATH}/.localsettings.json"
 set_vim() {
     set -o vi
     if [ "$is_arch" = true ]; then
-        bind -m vi-command -x '"p": CLIP=$(wl-paste | sed -z "s/\r//g; s/\n/\\\\\n/g") && READLINE_LINE="${READLINE_LINE:0:READLINE_POINT+1}${CLIP}${READLINE_LINE:READLINE_POINT+1}" && READLINE_POINT=$((READLINE_POINT + ${#CLIP}))'
+        bind -m vi-command -x '"p": CLIP=$(wl-paste | sed -z "s/\r//g; s/\n/;\n/g; s/[;\n]*$//") && READLINE_LINE="${READLINE_LINE:0:READLINE_POINT+1}${CLIP}${READLINE_LINE:READLINE_POINT+1}" && READLINE_POINT=$((READLINE_POINT + ${#CLIP}))'
         bind -m vi-command -x '"yy": printf "%s" "$READLINE_LINE" | wl-copy'
     else
         bind -m vi-command -x '"p": CLIP=$(xclip -selection clipboard -o | sed -z "s/\r//g; s/\n/\\\\\n/g") && READLINE_LINE="${READLINE_LINE:0:READLINE_POINT+1}${CLIP}${READLINE_LINE:READLINE_POINT+1}" && READLINE_POINT=$((READLINE_POINT + ${#CLIP}))'
@@ -656,15 +644,6 @@ ssh_unmount() {
         fusermount -u ~/remote-mounts/$1
     fi
 }
-# //==========================================//
-# //==========================================//
-#
-# //==========================================//
-# //================= latex ==================//
-# latex related files
-latex_meta="$latex_dir/meta.tex" # typical header stuff to add
-latex_build="$latex_dir/build.sh" # build latex in terminal
-chmod -f u+x latex_build
 # //==========================================//
 # //==========================================//
 #
