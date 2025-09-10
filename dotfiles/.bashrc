@@ -111,19 +111,12 @@ fi
 # configure device
 # default configs
 envdir=$HOME/.envs
-case "$(hostname)" in
-    "Acer-DK") # wsl pc
-        envdir="/mnt/hdd1/.envs/arch"
-        ;;
-    "potato") # arch pc
-        envdir="/mnt/hdd1/.envs/arch"
-        ;;
-    "FS-Laptop") # wsl laptop
-        envdir="/mnt/win/.envs/arch"
-        ;;
-    *)
-        ;;
-esac
+
+# load local variables
+if [ -f ~/.bash_vars ]; then
+    source ~/.bash_vars
+fi
+
 if grep -q "^ID=arch" /etc/os-release 2>/dev/null; then
     is_arch=true
 else

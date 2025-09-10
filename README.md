@@ -62,4 +62,14 @@ git clone https://github.com/mrdandelion6/faisal.nvim.git
 ```
 note that you obviously don't need to get neovim but you'll have to edit `~/.bashrc` to remove some echo messages when neovim isn't found.
 
-i use the .localsettings.json found in my [neovim repository](https://github.com/mrdandelion6/faisal.nvim#) for keeping track of whether i'm using colemak-dh or qwerty layout.
+i use the `.localsettings.json` found in my [neovim repository](https://github.com/mrdandelion6/faisal.nvim#) for keeping track of whether i'm using colemak-dh or qwerty layout. will also change mappings for vim if using `.vimrc` , and for in terminal motions from `set -o vi`.
+
+## local variables
+if you want to have local variables to store differing file paths across devices , then create and edit the file `~/.bash_vars`.
+
+here is a sample:
+```bash
+fall_courses="/mnt/hdd2/study/bsc/y4/fall_courses"
+fall_taships="/mnt/hdd2/study/bsc/other/ta-ship/2025-2026/fall_taships"
+envdir="/mnt/hdd1/.envs/arch"
+```
