@@ -317,12 +317,8 @@ tar_all_dirs() {
         echo "Zipping completed!"
         echo "Files saved to: $dest_dir"
     }
-# //==========================================//
-# //==========================================//
-#
-# //==========================================//
-# //================= btrfs ==================//
-# some btrfs file system utilities
+
+eval "$(zoxide init bash --cmd e)"
 
 # //==========================================//
 # //==========================================//
@@ -366,10 +362,10 @@ set_vim() {
     set -o vi
     if [ "$is_arch" = true ]; then
         bind -m vi-command -x '"p": CLIP=$(wl-paste | sed -z "s/\r//g; s/\n/;\n/g; s/[;\n]*$//") && READLINE_LINE="${READLINE_LINE:0:READLINE_POINT+1}${CLIP}${READLINE_LINE:READLINE_POINT+1}" && READLINE_POINT=$((READLINE_POINT + ${#CLIP}))'
-        bind -m vi-command -x '"yy": printf "%s" "$READLINE_LINE" | wl-copy'
-    else
-        bind -m vi-command -x '"p": CLIP=$(xclip -selection clipboard -o | sed -z "s/\r//g; s/\n/\\\\\n/g") && READLINE_LINE="${READLINE_LINE:0:READLINE_POINT+1}${CLIP}${READLINE_LINE:READLINE_POINT+1}" && READLINE_POINT=$((READLINE_POINT + ${#CLIP}))'
-        bind -m vi-command -x '"yy": printf "%s" "$READLINE_LINE" | xclip -selection clipboard && printf "%s" "$READLINE_LINE" | xclip -selection primary'
+            bind -m vi-command -x '"yy": printf "%s" "$READLINE_LINE" | wl-copy'
+        else
+            bind -m vi-command -x '"p": CLIP=$(xclip -selection clipboard -o | sed -z "s/\r//g; s/\n/\\\\\n/g") && READLINE_LINE="${READLINE_LINE:0:READLINE_POINT+1}${CLIP}${READLINE_LINE:READLINE_POINT+1}" && READLINE_POINT=$((READLINE_POINT + ${#CLIP}))'
+                bind -m vi-command -x '"yy": printf "%s" "$READLINE_LINE" | xclip -selection clipboard && printf "%s" "$READLINE_LINE" | xclip -selection primary'
     fi
     colemak_binds=(
         # lowercase movement keys
@@ -640,6 +636,16 @@ ssh_unmount() {
 # //==========================================//
 # //==========================================//
 #
+# //================== cuda ==================//
+# //==========================================//
+
+# 1080ti support babyy
+alias nv='nvcc -ccbin g++-14 -arch=sm_61 -Wno-deprecated-gpu-targets'
+# make sure you have cuda 12.9.1 and gcc14
+
+# //==========================================//
+# //==========================================//
+#
 # //================== path ==================//
 # //==========================================//
 # stuff that needs to be added to path
@@ -667,8 +673,8 @@ if command -v pyenv 1>/dev/null 2>&1; then
 fi
 
 # cuda
-export PATH=/usr/local/cuda-11.8/bin${PATH:+:${PATH}}
-export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+export PATH=/opt/cuda/bin:$PATH
+export LD_LIBRARY_PATH=/opt/cuda/lib64:$LD_LIBRARY_PATH
 
 # go
 export GOPATH="$HOME/.local/share/go"
