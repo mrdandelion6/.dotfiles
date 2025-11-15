@@ -609,7 +609,7 @@ unset_env() {
     unset VIRTUAL_ENV
     if [ -n "$PATH" ]; then
         # remove all the env paths
-        export PATH=$(echo $PATH | tr ':' '\n' | grep -v "/.envs/", | tr '\n' ':' | sed 's/:$//')
+        export PATH=$(echo $PATH | tr ':' '\n' | grep -v "/.envs/" | tr '\n' ':' | sed 's/:$//')
     fi
 }
 # //==========================================//
@@ -709,6 +709,9 @@ function set_miniconda() {
     fi
     unset __conda_setup
     # <<< conda initialize <<<
+    if [ -n "$CONDA_PREFIX" ]; then
+        export PATH="$CONDA_PREFIX/bin:$PATH"
+    fi
 }
 
 # //==========================================//
