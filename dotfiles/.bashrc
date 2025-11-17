@@ -318,7 +318,9 @@ tar_all_dirs() {
         echo "Files saved to: $dest_dir"
     }
 
-eval "$(zoxide init bash --cmd e)"
+# i wrap this in a function e() which is easier for me to press. see at the top
+# of the neovim section
+eval "$(zoxide init bash --cmd z)"
 
 # //==========================================//
 # //==========================================//
@@ -327,6 +329,17 @@ eval "$(zoxide init bash --cmd e)"
 # //================= neovim =================//
 # here you find tools and functions related to neovim
 NEOVIM_PATH="$HOME/.config/nvim"
+
+function cd() {
+    builtin cd "$@"
+    notify_nvim
+}
+
+function e() {
+    # zoxide wrapper
+    z "$@"
+    notify_nvim
+}
 
 nvim() {
     if [[ "$VIRTUAL_ENV" != "neovim" ]]; then
@@ -347,10 +360,6 @@ notify_nvim() {
     fi
 }
 
-function cd() {
-    builtin cd "$@"
-    notify_nvim
-}
 # //==========================================//
 # //==========================================//
 #
