@@ -183,11 +183,9 @@ is_arch         : boolean indicating if running on Arch Linux"'
 alias src='source ~/.bashrc'
 
 shorten_path() {
-    local max_path_len=12
-
     _shorten_path_helper() {
+        local max_path_len=15  # Move it here
         local p="$PWD"
-        # Replace home directory with ~
         p="${p/#$HOME/\~}"
 
         if [ ${#p} -gt $max_path_len ]; then
