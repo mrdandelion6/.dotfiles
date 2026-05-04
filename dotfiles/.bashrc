@@ -341,7 +341,7 @@ tar_all_dirs() {
 
 # i wrap this in a function e() which is easier for me to press. see at the top
 # of the neovim section
-eval "$(zoxide init bash --cmd z)" 2> /dev/null
+command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init bash --cmd z)"
 
 # //==========================================//
 # //==========================================//
