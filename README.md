@@ -1,6 +1,6 @@
 # dotfiles
 
-my dotfiles for unix. does not include [my neovim config](https://github.com/mrdandelion6/faisal.nvim).
+my dotfiles for linux. does not include [my neovim config](https://github.com/mrdandelion6/faisal.nvim).
 
 ## desc
 
