@@ -44,30 +44,27 @@ and if you want to ignore something from being overriden, create a file `ignore.
 
 ## .bashrc deps
 
-some deps
+no deps are strictly required to use this `.bashrc` , unless you want to invoke custom commands.
 
 ```bash
-# general
-pacman -S jq gvim inetutils pv
+# useful
+pacman -S gvim inetutils pv
+
+# cool
+yay -S fastfetch
 
 # for python mkenv utilities
 pacman -S python python-pip pyenv
 pip install --break-system-packages virtualenv
 
-# remote mounting
+# for remote mounting
 pacman -S sshfs fusermount
 
-# if using arch
+# if using arch wayland
 pacman -S yay wl-clipboard
-yay -S fastfetch
 
-# if not using arch
+# if using ubuntu instead
 sudo apt install xclip
-
-# for neovim , if you want to use the .localsettings.json
-pacman -S neovim
-cd ~/.config
-git clone https://github.com/mrdandelion6/faisal.nvim.git
 ```
 
 note that you obviously don't need to get neovim but you'll have to edit `~/.bashrc` to remove some echo messages when neovim isn't found.

@@ -366,16 +366,24 @@ notify_nvim() {
 # //==========================================//
 # //================== vim ===================//
 # for in terminal vim
-VIM_LOCAL_SETTINGS="${NEOVIM_PATH}/.localsettings.json"
+
+# layout settings persist in file below
+EDITOR_SETTINGS_DIR="${HOME}/.config/editor"
+LAYOUT_FILE="${EDITOR_SETTINGS_DIR}/layout"
+mkdir -p "$EDITOR_SETTINGS_DIR"
+
 set_vim() {
     set -o vi
+
+    # NOTE: copy and pasting doesn't work for arch without wl-paste. will fail silently
     if [ "$is_arch" = true ]; then
         bind -m vi-command -x '"p": CLIP=$(wl-paste | sed -z "s/\r//g; s/\n/;\n/g; s/[;\n]*$//") && READLINE_LINE="${READLINE_LINE:0:READLINE_POINT+1}${CLIP}${READLINE_LINE:READLINE_POINT+1}" && READLINE_POINT=$((READLINE_POINT + ${#CLIP}))'
-            bind -m vi-command -x '"yy": printf "%s" "$READLINE_LINE" | wl-copy'
-        else
-            bind -m vi-command -x '"p": CLIP=$(xclip -selection clipboard -o | sed -z "s/\r//g; s/\n/\\\\\n/g") && READLINE_LINE="${READLINE_LINE:0:READLINE_POINT+1}${CLIP}${READLINE_LINE:READLINE_POINT+1}" && READLINE_POINT=$((READLINE_POINT + ${#CLIP}))'
-                bind -m vi-command -x '"yy": printf "%s" "$READLINE_LINE" | xclip -selection clipboard && printf "%s" "$READLINE_LINE" | xclip -selection primary'
+        bind -m vi-command -x '"yy": printf "%s" "$READLINE_LINE" | wl-copy'
+    else
+        bind -m vi-command -x '"p": CLIP=$(xclip -selection clipboard -o | sed -z "s/\r//g; s/\n/\\\\\n/g") && READLINE_LINE="${READLINE_LINE:0:READLINE_POINT+1}${CLIP}${READLINE_LINE:READLINE_POINT+1}" && READLINE_POINT=$((READLINE_POINT + ${#CLIP}))'
+        bind -m vi-command -x '"yy": printf "%s" "$READLINE_LINE" | xclip -selection clipboard && printf "%s" "$READLINE_LINE" | xclip -selection primary'
     fi
+
     colemak_binds=(
         # lowercase movement keys
         'k:backward-char'          # h -> k (left)
@@ -395,35 +403,53 @@ set_vim() {
         'J:vi-end-word'         # E -> J
         'L:vi-replace'          # I -> L
     )
-    if [ -d "$NEOVIM_PATH" ]; then
-        [ ! -f "$VIM_LOCAL_SETTINGS" ] && touch "$VIM_LOCAL_SETTINGS"
-        key_layout=$(jq -r '.layout // empty' "$VIM_LOCAL_SETTINGS")
+
+    qwerty_binds=(
+        'h:backward-char'
+        'j:next-history'
+        'k:previous-history'
+        'l:forward-char'
+        'H:backward-word'
+        'J:beginning-of-history'
+        'K:end-of-history'
+        'L:forward-word'
+        'n:vi-search-again'
+        'e:vi-end-word'
+        'i:vi-insertion-mode'
+        'N:vi-rev-repeat-search'
+        'E:vi-end-word'
+        'I:vi-replace'
+    )
+
+    if [ -f "$LAYOUT_FILE" ]; then
+        key_layout=$(cat "$LAYOUT_FILE" 2>/dev/null | tr -d '\n\r')
+
+        # bind colemak
         if [[ "$key_layout" == "colemak" ]]; then
             for binding in "${colemak_binds[@]}"; do
                 bind -m vi-command "$binding"
             done
+
+        # default binds
+        elif [[ "$key_layout" == "qwerty" ]]; then
+            for binding in "${qwerty_binds[@]}"; do
+                bind -m vi-command "$binding"
+            done
+
         fi
-    else
-        echo "neovim not set, missing path: $NEOVIM_PATH"
     fi
 }
 
 setc() {
     # set the current vim layout to colemak
-    if [ ! -s "$VIM_LOCAL_SETTINGS" ] || ! jq empty "$VIM_LOCAL_SETTINGS" 2>/dev/null; then # file doesn't exist or it contains invalid json
-        echo '{}' > "$VIM_LOCAL_SETTINGS"
-    fi
-    jq '.layout = "colemak"' "$VIM_LOCAL_SETTINGS" > temp.json && mv temp.json "$VIM_LOCAL_SETTINGS"
+    echo "colemak" > "$LAYOUT_FILE"
     set_vim
     echo "changed layout to colemak-dh"
 }
 
 setq() {
     # set the current vim layout to qwerty
-    if [ ! -s "$VIM_LOCAL_SETTINGS" ] || ! jq empty "$VIM_LOCAL_SETTINGS" 2>/dev/null; then # file doesn't exist or it contains invalid json
-        echo '{}' > "$VIM_LOCAL_SETTINGS"
-    fi
-    jq '.layout = "qwerty"' "$VIM_LOCAL_SETTINGS" > temp.json && mv temp.json "$VIM_LOCAL_SETTINGS"
+    echo "qwerty" > "$LAYOUT_FILE"
     set_vim
     echo "changed layout to qwerty"
 }
@@ -731,7 +757,7 @@ function set_miniconda() {
 # anything that needs to be run at the end
 hp
 unset_env
-set_vim
 remove_path_duplicates
 welcome
+set_vim
 notify_nvim
