@@ -511,7 +511,7 @@ center_text() {
 # print the welcome message , whether fastfetch or ascii art
 welcome() {
     echo; echo
-    if [ "$is_arch" = true ]; then
+    if [[ "$is_arch" = true ]] && command -v fastfetch >/dev/null 2>&1; then
         fastfetch
     elif [ -f "$ascii_path$ascii_art" ]; then
         echo -e "${WELCOME_COLOR}$(cat "$ascii_path$ascii_art")${NC}" | center_text
