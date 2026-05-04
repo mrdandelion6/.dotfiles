@@ -180,18 +180,39 @@ envdir          : path to python virtual environments
 NEOVIM_PATH     : path to neovim configuration
 is_arch         : boolean indicating if running on Arch Linux"'
 
-hp() {
+alias src='source ~/.bashrc'
+
+shorten_path() {
+    local max_path_len=12
+
+    _shorten_path_helper() {
+        local p="$PWD"
+        # Replace home directory with ~
+        p="${p/#$HOME/\~}"
+
+        if [ ${#p} -gt $max_path_len ]; then
+            echo "[...${p: -$((max_path_len-3))}]"
+        else
+            echo "[$p]"
+        fi
+    }
+
+    export PS1='\[\033[0m\]$(_shorten_path_helper)\[\033[0;36m\] \$ \[\033[0m\]'
+}
+
+hide_path() {
     # truncate path to $
     clear
     export PS1="\[\033[0;36m\]\$ \[\033[0m\]"
 }
+alias hp='hide_path'
 
-sp() {
+show_path() {
     # show full path
     export PS1='${debian_chroot:+($debian_chroot)}\[\033[00;31m\]\u@\h\[\033[00m\]:\[\033[01;30m\]\w\[\033[00m\]\$ '
 }
+alias sp='shorten_path'
 
-alias src='source ~/.bashrc'
 
 format-mount() {
     sudo mount -t "$3" -o uid=$(id -u),gid=$(id -g) "$1" "$2"
@@ -758,7 +779,7 @@ function set_miniconda() {
 # //================= script ==================//
 # //==========================================//
 # anything that needs to be run at the end
-hp
+shorten_path
 unset_env
 remove_path_duplicates
 welcome
