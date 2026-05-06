@@ -184,7 +184,7 @@ alias src='source ~/.bashrc'
 
 shorten_path() {
     _shorten_path_helper() {
-        local max_path_len=15  # Move it here
+        local max_path_len=15
         local p="$PWD"
         p="${p/#$HOME/\~}"
 
@@ -777,7 +777,7 @@ function set_miniconda() {
 # //================= script ==================//
 # //==========================================//
 # anything that needs to be run at the end
-shorten_path
+hide_path
 unset_env
 remove_path_duplicates
 welcome
