@@ -19,48 +19,23 @@ set listchars=trail:·
 highlight SpecialKey ctermfg=7 guifg=#c0c0c0
 
 " ===== COLEMAK LAYOUT SUPPORT =====
-let g:current_layout = 'qwerty'
-" path to the local settings file
-let g:settings_file = expand('~/.config/nvim/.localsettings.json')
+" persist layout settings here
+let s:settings_dir = expand('$HOME/.config/editor')
+let s:layout_file = s:settings_dir . '/layout'
+call mkdir(s:settings_dir, 'p')
 
-" function to read layout from json settings file
+" function to read layout from settings file
 function! ReadLayout()
-    if !filereadable(g:settings_file)
-        echo "Settings file not found: " . g:settings_file
-        return 'qwerty'
+    if filereadable(s:layout_file)
+        return trim(join(readfile(s:layout_file), "\n"))
     endif
-
-    try
-        let content = join(readfile(g:settings_file), '')
-        " extract layout value using regex
-        let layout_match = matchlist(content, '"layout":\s*"\([^"]*\)"')
-        if len(layout_match) > 1
-            return layout_match[1]
-        else
-            return 'qwerty'
-        endif
-    catch
-        echo "Error reading settings file: " . v:exception
-        return 'qwerty'
-    endtry
+    return 'qwerty'
 endfunction
 
-" function to update only the layout in the json file
+" function to update layout file
 function! UpdateLayout(new_layout)
-    if !filereadable(g:settings_file)
-        echo "Settings file not found: " . g:settings_file
-        return
-    endif
-
-    try
-        let content = join(readfile(g:settings_file), '')
-        " replace the layout value while preserving everything else
-        let updated_content = substitute(content, '"layout":\s*"[^"]*"', '"layout": "' . a:new_layout . '"', '')
-
-        call writefile([updated_content], g:settings_file)
-    catch
-        echo "Error updating settings file: " . v:exception
-    endtry
+    call mkdir(s:settings_dir, 'p')
+    call writefile([a:new_layout], s:layout_file)
 endfunction
 
 " function to apply colemak remaps
@@ -164,7 +139,7 @@ endfunction
 
 " function to toggle between colemak and qwerty
 function! ToggleLayout()
-    if g:current_layout == 'qwerty'
+    if get(g:, 'current_layout', 'qwerty') == 'qwerty'
         call ApplyColemakRemaps()
         call UpdateLayout('colemak')
         echo "Using Colemak-DH"
@@ -194,6 +169,7 @@ endfunction
 
 " key mapping for toggle
 nnoremap <Leader>tc :call ToggleLayout()<CR>
+
 " initialize layout when vim starts
 autocmd VimEnter * call InitializeLayout()
 
@@ -205,6 +181,7 @@ if has('win32') || has('win64')
     set shellquote=\"
     set shellxquote=
 endif
+
 " override :term to open vertical terminal
 command! -nargs=* Term :botright vertical terminal <args>
 cnoreabbrev term Term
@@ -212,6 +189,7 @@ cnoreabbrev term Term
 " allow :q and :qa to quit even with running terminal jobs
 set confirm
 autocmd TerminalOpen * set bufhidden=hide
+
 " double escape to exit terminal mode to normal mode
 tnoremap <Esc><Esc> <C-\><C-n>
 
