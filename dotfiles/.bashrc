@@ -385,6 +385,8 @@ notify_nvim() {
 # //==========================================//
 # //================== vim ===================//
 # for in terminal vim
+export EDITOR=vim
+export VISUAL=vim
 
 # layout settings persist in file below
 EDITOR_SETTINGS_DIR="${HOME}/.config/editor"
