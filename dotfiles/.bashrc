@@ -396,13 +396,22 @@ mkdir -p "$EDITOR_SETTINGS_DIR"
 set_vim() {
     set -o vi
 
-    # NOTE: copy and pasting doesn't work for arch without wl-paste. will fail silently
-    if [ "$is_arch" = true ]; then
-        bind -m vi-command -x '"p": CLIP=$(wl-paste | sed -z "s/\r//g; s/\n/;\n/g; s/[;\n]*$//") && READLINE_LINE="${READLINE_LINE:0:READLINE_POINT+1}${CLIP}${READLINE_LINE:READLINE_POINT+1}" && READLINE_POINT=$((READLINE_POINT + ${#CLIP}))'
-        bind -m vi-command -x '"yy": printf "%s" "$READLINE_LINE" | wl-copy'
+    local paste_cmd copy_cmd
+
+    if command -v wl-paste >/dev/null 2>&1 && command -v wl-copy >/dev/null 2>&1; then
+        paste_cmd='wl-paste'
+        copy_cmd='wl-copy'
+    elif command -v xclip >/dev/null 2>&1; then
+        paste_cmd='xclip -selection clipboard -o'
+        copy_cmd='xclip -selection clipboard'
     else
-        bind -m vi-command -x '"p": CLIP=$(xclip -selection clipboard -o | sed -z "s/\r//g; s/\n/\\\\\n/g") && READLINE_LINE="${READLINE_LINE:0:READLINE_POINT+1}${CLIP}${READLINE_LINE:READLINE_POINT+1}" && READLINE_POINT=$((READLINE_POINT + ${#CLIP}))'
-        bind -m vi-command -x '"yy": printf "%s" "$READLINE_LINE" | xclip -selection clipboard && printf "%s" "$READLINE_LINE" | xclip -selection primary'
+        paste_cmd=''
+        copy_cmd=''
+    fi
+
+    if [[ -n "$paste_cmd" && -n "$copy_cmd" ]]; then
+        bind -m vi-command -x "\"p\": CLIP=\$($paste_cmd | sed -z 's/\r//g; s/\n/;\n/g; s/[;\n]*$//') && READLINE_LINE=\"\${READLINE_LINE:0:READLINE_POINT+1}\${CLIP}\${READLINE_LINE:READLINE_POINT+1}\" && READLINE_POINT=\$((READLINE_POINT + \${#CLIP}))"
+        bind -m vi-command -x "\"yy\": printf '%s' \"\$READLINE_LINE\" | $copy_cmd"
     fi
 
     colemak_binds=(
@@ -770,6 +779,16 @@ function set_miniconda() {
         export PATH="$CONDA_PREFIX/bin:$PATH"
     fi
 }
+
+# //==========================================//
+# //==========================================//
+#
+# //================= local ==================//
+# //==========================================//
+
+if [[ -f "$HOME/.bash_local" ]]; then
+    source "$HOME/.bash_local"
+fi
 
 # //==========================================//
 # //==========================================//
