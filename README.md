@@ -48,7 +48,7 @@ no deps are strictly required to use this `.bashrc` , unless you want to invoke 
 
 ```bash
 # useful
-pacman -S gvim inetutils pv
+pacman -S gvim inetutils pv # vim-gtk3 instead of gvim for apt
 
 # cool
 yay -S fastfetch

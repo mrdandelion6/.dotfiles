@@ -1,5 +1,4 @@
 let mapleader = " "
-set clipboard=unnamed,unnamedplus
 set backspace=indent,eol,start
 syntax on
 nnoremap c "_c
@@ -193,7 +192,61 @@ autocmd TerminalOpen * set bufhidden=hide
 " double escape to exit terminal mode to normal mode
 tnoremap <Esc><Esc> <C-\><C-n>
 
-" ====== WAYLAND =====
-" for arch linux wayland
-command! WlPaste execute 'normal! i' . system('wl-paste --no-newline')
-nnoremap <Leader>p :WlPaste<CR>
+" ===== CLIPBOARD BACKEND =====
+if has('clipboard')
+    set clipboard=unnamed,unnamedplus
+else
+    set clipboard=
+endif
+
+if executable('wl-copy') && executable('wl-paste')
+    let s:clip_copy_cmd  = 'wl-copy'
+    let s:clip_paste_cmd = 'wl-paste --no-newline'
+elseif executable('xclip')
+    let s:clip_copy_cmd  = 'xclip -selection clipboard'
+    let s:clip_paste_cmd = 'xclip -selection clipboard -o'
+else
+    let s:clip_copy_cmd  = ''
+    let s:clip_paste_cmd = ''
+endif
+
+if has('clipboard')
+    set clipboard=unnamed,unnamedplus
+else
+    set clipboard=
+endif
+
+function! s:SystemPaste()
+    if empty(s:clip_paste_cmd)
+        echo "No clipboard backend found"
+        return
+    endif
+
+    let l:clip = system(s:clip_paste_cmd)
+    if v:shell_error
+        echo "Clipboard paste failed"
+        return
+    endif
+
+    let l:save_reg = getreg('"')
+    let l:save_type = getregtype('"')
+    call setreg('"', l:clip)
+    normal! ""p
+    call setreg('"', l:save_reg, l:save_type)
+endfunction
+
+function! s:CopyLineToSystemClipboard()
+    if empty(s:clip_copy_cmd)
+        echo "No clipboard backend found"
+        return
+    endif
+
+    call system(s:clip_copy_cmd, getline('.') . "\n")
+    if v:shell_error
+        echo "Clipboard copy failed"
+    endif
+endfunction
+
+command! SysPaste call <SID>SystemPaste()
+nnoremap <Leader>p :SysPaste<CR>
+nnoremap <Leader>yy :call <SID>CopyLineToSystemClipboard()<CR>
