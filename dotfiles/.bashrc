@@ -340,7 +340,6 @@ tar_all_dirs() {
 # i wrap this in a function e() which is easier for me to press. see at the top
 # of the neovim section
 command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init bash --cmd z)"
-
 # //==========================================//
 # //==========================================//
 #
@@ -378,7 +377,6 @@ notify_nvim() {
         printf '\033]51;%s\007' $(pwd)
     fi
 }
-
 # //==========================================//
 # //==========================================//
 #
@@ -502,7 +500,6 @@ alias vi='vim'
 #
 # //================ welcome =================//
 # //==========================================//
-
 # add colors here
 CUSTOM_PINK='\e[38;2;228;171;212m'
 CUSTOM_GRAY='\e[38;2;196;189;210m'
@@ -512,9 +509,9 @@ NC='\e[0m'
 CENTERED_WELCOME=1
 WELCOME_COLOR=$CUSTOM_GRAY
 
- # change this to a different location if you want
- ascii_path="$HOME/.dotfiles/ascii_art/"
- ascii_art="reaper2.txt"
+# change this to a different location if you want
+ascii_path="$HOME/.dotfiles/ascii_art/"
+ascii_art="reaper2.txt"
 
 # function that prints given text centered in the terminal for whatever width.
 center_text() {
@@ -534,15 +531,60 @@ center_text() {
         # calculate padding
         padding=$(( (term_width - ${#plain_line}) / 2 ))
             # add padding before the line
-            printf "%${padding}s%s\n" "" "$line"
-        done
-    }
+        printf "%${padding}s%s\n" "" "$line"
+    done
+}
+
+# --- binary rain cat welcome ---
+CAT_ART_FILE="${ascii_path}cat.txt"
+CAT_FULL_W=109
+CAT_FULL_H=39
+CAT_MIN_W=50
+CAT_MIN_H=35
+CAT_CENTER_COL=54  # horizontal center of the art
+
+show_cat() {
+    local term_w term_h
+    term_w=$(tput cols)
+    term_h=$(tput lines)
+
+    [[ $term_w -lt $CAT_MIN_W || $term_h -lt $CAT_MIN_H ]] && return
+
+    local art_w art_h
+    art_w=$(( term_w < CAT_FULL_W ? term_w : CAT_FULL_W ))
+    art_h=$(( term_h - 2 < CAT_FULL_H ? term_h - 2 : CAT_FULL_H ))
+
+    local half=$(( art_w / 2 ))
+    local col_start=$(( CAT_CENTER_COL - half ))
+    local col_end=$(( col_start + art_w - 1 ))
+    [[ $col_start -lt 0 ]] && col_start=0 && col_end=$(( art_w - 1 ))
+    [[ $col_end -ge $CAT_FULL_W ]] && col_end=$(( CAT_FULL_W - 1 )) && col_start=$(( col_end - art_w + 1 ))
+    [[ $col_start -lt 0 ]] && col_start=0
+    local visible_w=$(( col_end - col_start + 1 ))
+
+    local pad=$(( (term_w - visible_w) / 2 ))
+    local pad_str
+    pad_str=$(printf "%${pad}s" "")
+
+    echo
+    while IFS= read -r line; do
+        echo "${pad_str}${line}"
+    done < <(python3 -c "
+lines = open('$CAT_ART_FILE').read().splitlines()
+for l in lines[:${art_h}]:
+    l = l + ' ' * (${CAT_FULL_W} - len(l))
+    print(l[${col_start}:${col_end}+1])
+")
+    echo
+}
 
 # print the welcome message , whether fastfetch or ascii art
 welcome() {
     if command -v fastfetch >/dev/null 2>&1; then
         echo; echo
         fastfetch
+    elif [ -f "$CAT_ART_FILE" ]; then
+        show_cat
     elif [ -f "$ascii_path$ascii_art" ]; then
         echo; echo
         echo -e "${WELCOME_COLOR}$(cat "$ascii_path$ascii_art")${NC}" | center_text
