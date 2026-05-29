@@ -1,5 +1,7 @@
 let mapleader = " "
 set backspace=indent,eol,start
+set shell=/bin/bash
+
 syntax on
 nnoremap c "_c
 nnoremap C "_C
@@ -253,14 +255,13 @@ nnoremap <Leader>yy :call <SID>CopyLineToSystemClipboard()<CR>
 
 " for ssh copying
 function! s:OSC52Copy(text)
-  let b64 = system('base64 -w 0', a:text)
+  let b64 = system('base64 -w 0 <<< ' . shellescape(a:text))
   let b64 = substitute(b64, '\n', '', 'g')
   let osc = "\033]52;c;" . b64 . "\007"
   if has('nvim')
     call chansend(v:stderr, osc)
   else
-    " vim compatible — write directly to terminal
-    silent! call writefile([osc], '/dev/tty', 'b')
+    call writefile([osc], '/dev/tty', 'b')
   endif
 endfunction
 
