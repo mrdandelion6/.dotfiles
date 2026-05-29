@@ -250,3 +250,13 @@ endfunction
 command! SysPaste call <SID>SystemPaste()
 nnoremap <Leader>p :SysPaste<CR>
 nnoremap <Leader>yy :call <SID>CopyLineToSystemClipboard()<CR>
+
+" for ssh copying
+function! s:OSC52Copy(text)
+  let b64 = system('base64 -w 0', a:text)
+  let b64 = substitute(b64, '\n', '', 'g')
+  let osc = "\033]52;c;" . b64 . "\007"
+  call chansend(v:stderr, osc)
+endfunction
+
+autocmd TextYankPost * if v:event.operator ==# 'y' | call s:OSC52Copy(join(v:event.regcontents, "\n")) | endif
