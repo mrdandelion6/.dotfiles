@@ -256,7 +256,12 @@ function! s:OSC52Copy(text)
   let b64 = system('base64 -w 0', a:text)
   let b64 = substitute(b64, '\n', '', 'g')
   let osc = "\033]52;c;" . b64 . "\007"
-  call chansend(v:stderr, osc)
+  if has('nvim')
+    call chansend(v:stderr, osc)
+  else
+    " vim compatible — write directly to terminal
+    silent! call writefile([osc], '/dev/tty', 'b')
+  endif
 endfunction
 
 autocmd TextYankPost * if v:event.operator ==# 'y' | call s:OSC52Copy(join(v:event.regcontents, "\n")) | endif
