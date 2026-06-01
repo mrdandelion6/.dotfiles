@@ -125,6 +125,49 @@ fi
 # //==========================================//
 # //==========================================//
 #
+# //================== path ==================//
+# //==========================================//
+# stuff that needs to be added to path
+remove_path_duplicates() {
+    export PATH=$(echo "$PATH" | tr ':' '\n' | awk '!seen[$0]++' | tr '\n' ':' | sed 's/:$//')
+}
+
+# bin
+export PATH=/usr/bin:$PATH
+
+# local stuff
+export PATH=$HOME/.local/bin:$PATH
+
+# nvm
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # this loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # this loads nvm bash_completion
+
+# pyenv
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+if command -v pyenv 1>/dev/null 2>&1; then
+    eval "$(pyenv init -)"
+fi
+
+# cuda
+export PATH=/opt/cuda/bin:$PATH
+export LD_LIBRARY_PATH=/opt/cuda/lib64:$LD_LIBRARY_PATH
+
+# go
+export GOPATH="$HOME/.local/share/go"
+export PATH="$PATH:$GOPATH/bin"
+
+# colors
+export LS_COLORS="$LS_COLORS:ow=1;34:tw=1;34:"
+
+# rust
+if [ -f "$HOME/.cargo/env" ]; then
+    . "$HOME/.cargo/env" # sourcing this adds .cargo/bin to path and other things
+fi
+# //==========================================//
+# //==========================================//
+#
 # //================== gen ===================//
 # //==========================================//
 # in this section you will find general utility tools
@@ -749,52 +792,7 @@ ssh_unmount() {
 
 # 1080ti support babyy
 alias nv='nvcc -ccbin g++-14 -arch=sm_61 -Wno-deprecated-gpu-targets'
-# make sure you have cuda 12.9.1 and gcc14
-
-# //==========================================//
-# //==========================================//
-#
-# //================== path ==================//
-# //==========================================//
-# stuff that needs to be added to path
-
-remove_path_duplicates() {
-    export PATH=$(echo "$PATH" | tr ':' '\n' | awk '!seen[$0]++' | tr '\n' ':' | sed 's/:$//')
-}
-
-# bin
-export PATH=/usr/bin:$PATH
-
-# python
-export PATH=$HOME/.local/bin:$PATH
-
-# nvm
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # this loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # this loads nvm bash_completion
-
-# pyenv
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
-if command -v pyenv 1>/dev/null 2>&1; then
-    eval "$(pyenv init -)"
-fi
-
-# cuda
-export PATH=/opt/cuda/bin:$PATH
-export LD_LIBRARY_PATH=/opt/cuda/lib64:$LD_LIBRARY_PATH
-
-# go
-export GOPATH="$HOME/.local/share/go"
-export PATH="$PATH:$GOPATH/bin"
-
-# colors
-export LS_COLORS="$LS_COLORS:ow=1;34:tw=1;34:"
-
-# rust
-if [ -f "$HOME/.cargo/env" ]; then
-    . "$HOME/.cargo/env" # sourcing this adds .cargo/bin to path and other things
-fi
+# NOTE: this is for my local PC. make sure you have cuda 12.9.1 and gcc14
 
 # //==========================================//
 # //==========================================//
