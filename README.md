@@ -4,7 +4,9 @@ my dotfiles for linux. does not include [my neovim config](https://github.com/mr
 
 ## desc
 
-this repository is a version control over my dotfiles like `.bashrc`. it also contains some scripts that are nice. you can back up and remove any dotfiles in `~` that are also in this repo. then you can create symbolic links in `~` that point to the dotfiles in this repo.
+this repository is a version control over my dotfiles like `.bashrc`. you can also find scripts i use in `scripts/` that get linked to `.local/bin` when you run `./link_scripts.sh`.
+
+you can back up and remove any dotfiles in `~` that are also in this repo. then you can create symbolic links in `~` that point to the dotfiles in this repo. this is done using the `backup_dotfiles.sh` and `override_dotfiles.sh` scripts (see **setup** below).
 
 ## setup
 
