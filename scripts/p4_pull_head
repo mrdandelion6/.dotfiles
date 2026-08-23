@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+Usage: p4_pull_head path/to/file [-o output_name] [-d output_dir]
+
+Pull the current Perforce head revision of a mapped file into a local output file.
+
+Options:
+  -o, --output   Output filename/path. Defaults to path.golden beside source.
+  -d, --dir      Directory to place the output file in. Created if needed.
+  -h, --help     Show this help.
+
+Examples:
+  p4_pull_head ip/system/xal/2.5/fmod/xal_ep/include/chip_interface.h
+  p4_pull_head ip/system/xal/2.5/fmod/xal_ep/include/chip_interface.h -o chip_interface_legacy.h
+  p4_pull_head ip/system/xal/2.5/fmod/xal_ep/include/chip_interface.h -d /tmp/golden
+EOF
+}
+
+die() {
+    echo "p4_pull_head: $*" >&2
+    exit 2
+}
+
+src=""
+out_name=""
+out_dir=""
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -o|--output)
+            shift
+            [[ $# -gt 0 ]] || die "missing argument for -o"
+            out_name="$1"
+            ;;
+        -d|--dir)
+            shift
+            [[ $# -gt 0 ]] || die "missing argument for -d"
+            out_dir="$1"
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        -*)
+            die "unknown option: $1"
+            ;;
+        *)
+            [[ -z "$src" ]] || die "unexpected extra argument: $1"
+            src="$1"
+            ;;
+    esac
+    shift
+done
+
+[[ -n "$src" ]] || {
+    usage >&2
+    exit 2
+}
+
+if [[ -z "$out_name" ]]; then
+    out_name="$(basename "$src").golden"
+fi
+
+if [[ -n "$out_dir" ]]; then
+    mkdir -p "$out_dir"
+    out_path="${out_dir%/}/$out_name"
+elif [[ "$out_name" == */* ]]; then
+    out_path="$out_name"
+else
+    src_dir="$(dirname "$src")"
+    out_path="${src_dir%/}/$out_name"
+fi
+
+fstat_out="$(p4 -ztag fstat -T depotFile,headRev "$src")" \
+    || die "p4 fstat failed for $src"
+
+depot_file="$(awk '$2 == "depotFile" {print $3; exit}' <<< "$fstat_out")"
+head_rev="$(awk '$2 == "headRev" {print $3; exit}' <<< "$fstat_out")"
+
+[[ -n "$depot_file" ]] || die "could not resolve depot path for $src"
+[[ -n "$head_rev" ]] || die "could not resolve head revision for $src"
+
+p4 print -q -o "$out_path" "${depot_file}#${head_rev}"
+echo "Wrote ${depot_file}#${head_rev} to ${out_path}"
