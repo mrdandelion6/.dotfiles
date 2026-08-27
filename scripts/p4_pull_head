@@ -8,7 +8,7 @@ Usage: p4_pull_head path/to/file [-o output_name] [-d output_dir]
 Pull the current Perforce head revision of a mapped file into a local output file.
 
 Options:
-  -o, --output   Output filename/path. Defaults to path.golden beside source.
+  -o, --output   Output filename/path. Defaults to name.golden.ext beside source.
   -d, --dir      Directory to place the output file in. Created if needed.
   -h, --help     Show this help.
 
@@ -61,7 +61,12 @@ done
 }
 
 if [[ -z "$out_name" ]]; then
-    out_name="$(basename "$src").golden"
+    src_base="$(basename "$src")"
+    if [[ "$src_base" == *.* && "$src_base" != .* ]]; then
+        out_name="${src_base%.*}.golden.${src_base##*.}"
+    else
+        out_name="${src_base}.golden"
+    fi
 fi
 
 if [[ -n "$out_dir" ]]; then
