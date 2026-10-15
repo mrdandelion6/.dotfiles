@@ -1,0 +1,13 @@
+# Two-way sync between PC hdd2 and the USB copy
+# Usage: unison hdd2            (interactive)
+#        unison hdd2 -batch     (auto, skips conflicts)
+
+root = /mnt/hdd2
+root = /mnt/usb/hdd2
+
+# USB is FAT/exFAT: ignore perms, case-insensitive names, 2s timestamps
+fat = true
+times = true
+
+ignore = Name System Volume Information
+ignore = Name .Trash-*
