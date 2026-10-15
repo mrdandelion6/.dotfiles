@@ -1,6 +1,6 @@
 # Two-way sync between PC hdd2 and the USB copy
 # Usage: unison hdd2            (interactive)
-#        unison hdd2 -batch     (auto, skips conflicts)
+#        unison hdd2 -batch     (fully automatic, newer wins on conflicts)
 
 root = /mnt/hdd2
 root = /mnt/usb/hdd2
@@ -9,5 +9,11 @@ root = /mnt/usb/hdd2
 fat = true
 times = true
 
+# If a file was edited on both sides, keep the newer one instead of asking
+prefer = newer
+
 ignore = Name System Volume Information
 ignore = Name .Trash-*
+
+# osu creates a pipe here, which exFAT cannot store
+ignore = Path game/osu/osu-lazer.backup/client.realm.note
