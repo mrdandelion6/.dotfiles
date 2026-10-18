@@ -211,9 +211,7 @@ set_vim    : configure vim mode with clipboard integration
 nvim       : launch neovim with proper environment
 
 === MOUNTING & FILE SYSTEMS ===
-format-mount    : mount with user permissions (usage: format-mount <device> <path> <type>)
-exfat-mount     : mount exfat filesystem (usage: exfat-mount <device> <path>)
-fat32-mount     : mount fat32 filesystem (usage: fat32-mount <device> <path>)
+mnt             : mount with user permissions, auto-detects type (usage: mnt [-t type] <device> <path>)
 tar_all_dirs    : tar all directories in source to destination
 ssh_mount       : mount remote directory via sshfs (usage: ssh_mount <user@host:path> <name>)
 ssh_unmount     : unmount sshfs directory (usage: ssh_unmount <name>)
@@ -255,13 +253,18 @@ show_path() {
 alias sp='shorten_path'
 
 
-format-mount() {
-    sudo mount -t "$3" -o uid=$(id -u),gid=$(id -g) "$1" "$2"
-}
+mnt() {
+    # mount a device with user permissions
+    # usage: mnt [-t type] <device> <path>
+    # type is auto-detected if not given
+    local type=""
+    if [ "$1" = "-t" ]; then
+        type="$2"
+        shift 2
+    fi
 
-exfat-mount() {
     if [ $# -ne 2 ]; then
-        echo "usage: exfat-mount /dev/sdXY /mnt/destination"
+        echo "usage: mnt [-t type] /dev/sdXY /mnt/destination"
         return 1
     fi
 
@@ -275,26 +278,18 @@ exfat-mount() {
         return 1
     fi
 
-    format-mount "$1" "$2" "exfat"
-}
+    [ -z "$type" ] && type=$(lsblk -no FSTYPE "$1")
 
-fat32-mount() {
-    if [ $# -ne 2 ]; then
-        echo "usage: fat32-mount /dev/sdXY /mnt/destination"
-        return 1
-    fi
-
-    if [ ! -e "$1" ]; then
-        echo "device: $1 doesn't exist"
-        return 1
-    fi
-
-    if [ ! -d "$2" ]; then
-        echo "path: $2 doesn't exist"
-        return 1
-    fi
-
-    format-mount "$1" "$2" "vfat"
+    # uid/gid only apply to filesystems without unix permissions
+    case "$type" in
+        vfat|fat32|exfat|ntfs|ntfs3)
+            [ "$type" = "fat32" ] && type="vfat"
+            sudo mount -t "$type" -o uid=$(id -u),gid=$(id -g) "$1" "$2"
+            ;;
+        *)
+            sudo mount ${type:+-t "$type"} "$1" "$2"
+            ;;
+    esac
 }
 
 tar_all_dirs() {
