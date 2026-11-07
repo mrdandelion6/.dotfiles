@@ -1,0 +1,7 @@
+{
+    "enabledPlugins": {
+        "lua-lsp@claude-plugins-official": true
+    },
+    "theme": "dark",
+    "editorMode": "vim"
+}
