@@ -62,6 +62,9 @@ pip install --break-system-packages virtualenv
 # for remote mounting
 pacman -S sshfs fusermount
 
+# for wezterm
+pacman -S ttf-3270-nerd
+
 # if using arch wayland
 pacman -S yay wl-clipboard
 
