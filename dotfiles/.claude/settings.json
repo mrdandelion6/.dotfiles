@@ -1,7 +1,8 @@
 {
     "enabledPlugins": {
         "lua-lsp@claude-plugins-official": true,
-        "pyright-lsp@claude-plugins-official": true
+        "pyright-lsp@claude-plugins-official": true,
+        "typescript-lsp@claude-plugins-official": true
     },
     "theme": "dark",
     "editorMode": "vim"
