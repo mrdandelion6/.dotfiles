@@ -5,5 +5,10 @@
         "typescript-lsp@claude-plugins-official": true
     },
     "theme": "dark",
-    "editorMode": "vim"
+    "editorMode": "vim",
+    "voiceEnabled": true,
+    "voice": {
+        "enabled": true,
+        "mode": "hold"
+    }
 }
