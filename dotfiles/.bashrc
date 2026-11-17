@@ -210,6 +210,10 @@ setq       : set vim keybindings to qwerty layout
 set_vim    : configure vim mode with clipboard integration
 nvim       : launch neovim with proper environment
 
+=== AI ===
+ccc    : claude --continue
+ccr    : claude --resume
+
 === MOUNTING & FILE SYSTEMS ===
 mnt             : mount with user permissions, auto-detects type (usage: mnt [-t type] <device> <path>)
 tar_all_dirs    : tar all directories in source to destination
@@ -824,6 +828,9 @@ function set_miniconda() {
 codex() {
     ~/.dotfiles/dotfiles/.codex/run_codex.sh "$@"
 }
+
+alias ccc='claude -c' # claude code continue
+alias ccr='claude -c' # claude code resume
 
 # //==========================================//
 # //==========================================//
