@@ -209,6 +209,11 @@ setc       : set vim keybindings to colemak layout
 setq       : set vim keybindings to qwerty layout
 set_vim    : configure vim mode with clipboard integration
 nvim       : launch neovim with proper environment
+tn         : tmux -> neovim
+tnt        : tmux -> neovim -> terminal
+tntc       : tmux -> neovim -> terminal -> claude
+nt         : neovim -> terminal
+ntc        : neovim -> terminal -> claude
 
 === AI ===
 ccc    : claude --continue
@@ -419,6 +424,37 @@ notify_nvim() {
         printf '\033]51;%s\007' $(pwd)
     fi
 }
+
+# --- launch shortcuts ---
+# t = tmux, n = neovim, t (after n) = :term, c = claude
+# order matters: tmux -> neovim -> terminal -> claude
+
+nt() {
+    # neovim with a terminal open
+    nvim -c 'terminal' -c 'startinsert' "$@"
+}
+
+ntc() {
+    # neovim -> terminal -> claude (quitting claude leaves you in the terminal)
+    nvim -c 'terminal' \
+         -c 'call chansend(b:terminal_job_id, "claude\r")' \
+         -c 'startinsert' "$@"
+}
+
+_tmux_run() {
+    # start tmux and type $1 into its shell so bash functions (nvim venv) work
+    # and you land back in a tmux shell afterwards. if already in tmux, just
+    # run it here instead of nesting.
+    if [ -n "$TMUX" ]; then
+        eval "$1"
+    else
+        tmux new-session \; send-keys "$1" C-m
+    fi
+}
+
+tn()   { _tmux_run "nvim $*"; }  # tmux -> neovim
+tnt()  { _tmux_run "nt $*"; }    # tmux -> neovim -> terminal
+tntc() { _tmux_run "ntc $*"; }   # tmux -> neovim -> terminal -> claude
 # //==========================================//
 # //==========================================//
 #
@@ -830,7 +866,7 @@ codex() {
 }
 
 alias ccc='claude -c' # claude code continue
-alias ccr='claude -c' # claude code resume
+alias ccr='claude -r' # claude code resume
 
 # //==========================================//
 # //==========================================//
