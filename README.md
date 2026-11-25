@@ -55,7 +55,7 @@ pacman -S gvim inetutils pv # vim-gtk3 instead of gvim for apt
 # cool
 yay -S fastfetch
 
-# for python mkenv utilities
+# for python mkvenv utilities
 pacman -S python python-pip pyenv
 pip install --break-system-packages virtualenv
 

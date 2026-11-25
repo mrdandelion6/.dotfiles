@@ -199,11 +199,12 @@ pushall    : push to all git remotes
 pullall    : pull from all git remotes
 
 === PYTHON ENVIRONMENT ===
-inenv      : check if in virtual environment
-actenv     : activate virtual environment (usage: actenv <name>)
-mkenv      : create new virtual environment (usage: mkenv <name> [python_version])
-lsenv      : list virtual environments in envdir with python versions
-unset_env  : unset virtual environment variables
+invenv     : check if in virtual environment
+actvenv    : activate virtual environment (usage: actvenv <name>)
+mkvenv     : create new virtual environment (usage: mkvenv <name> [python_version])
+lsvenv     : list virtual environments in envdir with python versions
+rmvenv     : delete a virtual environment, asks first (usage: rmvenv <name>)
+unset_venv : unset virtual environment variables
 pypath     : get path to pyenv python version (usage: pypath <version>)
 
 === VIM/NEOVIM ===
@@ -414,7 +415,7 @@ nvim() {
             deactivate
         fi
         if [ -d "$envdir/neovim" ]; then
-            actenv 'neovim'
+            actvenv 'neovim'
         fi
     fi
     command nvim "$@"
@@ -695,7 +696,7 @@ pullall() {
 alias python='python3'
 
 
-inenv() { # check if we are in a virtual environment
+invenv() { # check if we are in a virtual environment
     if [[ -z "$VIRTUAL_ENV" ]]; then
         echo "not in a virtual environment"
     else
@@ -703,7 +704,7 @@ inenv() { # check if we are in a virtual environment
     fi
 }
 
-actenv() {
+actvenv() {
     if [ -z "$1" ]; then
         echo "error: no environment name provided"
         return 1
@@ -737,11 +738,11 @@ pypath() {
     fi
 }
 
-mkenv() {
+mkvenv() {
     # create a virtual environment in our linux system
     # $1: name of the environment
     # $2: version of python to use
-    # note that the environment will be created in ~/envs
+    # note that the environment will be created in $envdir
 
     if [ -z "$1" ]; then
         echo "error: no environment name provided"
@@ -793,7 +794,7 @@ mkenv() {
     fi
 }
 
-lsenv() {
+lsvenv() {
     # list the virtual environments in $envdir with their python version
     # the active environment is marked with *
 
@@ -819,7 +820,42 @@ lsenv() {
     done
 }
 
-unset_env() {
+rmvenv() {
+    # delete a virtual environment from $envdir after confirmation
+    # $1: name of the environment
+
+    if [ -z "$1" ]; then
+        echo "error: no environment name provided"
+        return 1
+    fi
+    if [[ "$1" == */* || "$1" == "." || "$1" == ".." ]]; then
+        echo "error: give the environment name, not a path"
+        return 1
+    fi
+
+    local path="$envdir/$1"
+
+    if [ ! -d "$path" ]; then
+        echo "error: environment not found"
+        return 1
+    fi
+    if [ "$VIRTUAL_ENV" == "$path" ]; then
+        echo "error: environment is active. deactivate first."
+        return 1
+    fi
+
+    echo "delete environment at $path (y) ?"
+    read response
+    if [ "$response" == "y" ]; then
+        command rm -rf -- "$path"
+        echo "environment deleted"
+    else
+        echo "rejected"
+        return 0
+    fi
+}
+
+unset_venv() {
     unset VIRTUAL_ENV
     if [ -n "$PATH" ]; then
         # remove all the env paths
@@ -913,7 +949,7 @@ fi
 # //==========================================//
 # anything that needs to be run at the end
 hide_path
-unset_env
+unset_venv
 remove_path_duplicates
 welcome
 set_vim
