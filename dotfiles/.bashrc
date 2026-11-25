@@ -114,6 +114,7 @@ envdir=$HOME/.envs
 
 # load local variables
 if [ -f ~/.bash_vars ]; then
+    # ex. could override envdir
     source ~/.bash_vars
 fi
 
@@ -201,6 +202,7 @@ pullall    : pull from all git remotes
 inenv      : check if in virtual environment
 actenv     : activate virtual environment (usage: actenv <name>)
 mkenv      : create new virtual environment (usage: mkenv <name> [python_version])
+lsenv      : list virtual environments in envdir with python versions
 unset_env  : unset virtual environment variables
 pypath     : get path to pyenv python version (usage: pypath <version>)
 
@@ -789,6 +791,32 @@ mkenv() {
             return 0
         fi
     fi
+}
+
+lsenv() {
+    # list the virtual environments in $envdir with their python version
+    # the active environment is marked with *
+
+    if [ ! -d "$envdir" ]; then
+        echo "error: env directory not found: $envdir"
+        return 1
+    fi
+
+    echo "envs in $envdir:"
+    local env_path name version mark
+    for env_path in "$envdir"/*/; do
+        [ -d "$env_path" ] || continue
+        env_path="${env_path%/}"
+        name="${env_path##*/}"
+        if [ -f "$env_path/pyvenv.cfg" ]; then
+            version=$(sed -n 's/^version_info = \([0-9]*\.[0-9]*\.[0-9]*\).*/\1/p; s/^version = //p' "$env_path/pyvenv.cfg" | head -n 1)
+        else
+            version="(not a venv)"
+        fi
+        mark=" "
+        [ "$VIRTUAL_ENV" == "$env_path" ] && mark="*"
+        printf "%s %-20s %s\n" "$mark" "$name" "$version"
+    done
 }
 
 unset_env() {
