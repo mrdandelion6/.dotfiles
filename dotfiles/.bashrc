@@ -111,12 +111,21 @@ fi
 # configure device
 # default configs
 envdir=$HOME/.envs
+uv_python_dir=$HOME/.local/share/uv/python # uv's default
+uv_cache_dir=$HOME/.cache/uv # uv's default
 
 # load local variables
 if [ -f ~/.bash_vars ]; then
-    # ex. could override envdir
+    # ex. could override envdir, uv_python_dir, uv_cache_dir
     source ~/.bash_vars
 fi
+
+# where uv installs pythons and keeps its download cache. keep the cache on the same
+# drive as envdir so uv can link packages instead of copying them
+export UV_PYTHON_INSTALL_DIR="$uv_python_dir"
+export UV_CACHE_DIR="$uv_cache_dir"
+# only use uv's own pythons, never the system one in /usr/bin
+export UV_PYTHON_PREFERENCE=only-managed
 
 if grep -q "^ID=arch" /etc/os-release 2>/dev/null; then
     is_arch=true
@@ -143,13 +152,6 @@ export PATH=$HOME/.local/bin:$PATH
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # this loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # this loads nvm bash_completion
-
-# pyenv
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
-if command -v pyenv 1>/dev/null 2>&1; then
-    eval "$(pyenv init -)"
-fi
 
 # cuda
 export PATH=/opt/cuda/bin:$PATH
@@ -201,11 +203,11 @@ pullall    : pull from all git remotes
 === PYTHON ENVIRONMENT ===
 invenv     : check if in virtual environment
 actvenv    : activate virtual environment (usage: actvenv <name>)
-mkvenv     : create new virtual environment (usage: mkvenv <name> [python_version])
+mkvenv     : create new virtual environment with uv (usage: mkvenv <name> [python_version])
+upvenv     : rebuild a venv on another python, keeping its packages (usage: upvenv <name> <python_version>)
 lsvenv     : list virtual environments in envdir with python versions
 rmvenv     : delete a virtual environment, asks first (usage: rmvenv <name>)
 unset_venv : unset virtual environment variables
-pypath     : get path to pyenv python version (usage: pypath <version>)
 
 === VIM/NEOVIM ===
 setc       : set vim keybindings to colemak layout
@@ -230,6 +232,8 @@ ssh_unmount     : unmount sshfs directory (usage: ssh_unmount <name>)
 
 === IMPORTANT VARIABLES ===
 envdir          : path to python virtual environments
+uv_python_dir   : where uv installs python versions
+uv_cache_dir    : uv download cache, keep on the same drive as envdir
 NEOVIM_PATH     : path to neovim configuration
 is_arch         : boolean indicating if running on Arch Linux"'
 
@@ -720,77 +724,139 @@ actvenv() {
     fi
 }
 
-pypath() {
-    # return the path of the python executable if it exists.
-    # checks pyenv directory only
-
-    if [ -z "$1" ]; then
-        echo "error: no version provided"
-        return 1
-    fi
-
-    path="$PYENV_ROOT/versions/$1/"
-
-    if [ -d "$path" ]; then
-        echo "$path"
-    else
-        echo "error: version not found in pyenv directory"
-    fi
-}
-
 mkvenv() {
-    # create a virtual environment in our linux system
+    # create a virtual environment in $envdir with uv
     # $1: name of the environment
-    # $2: version of python to use
-    # note that the environment will be created in $envdir
+    # $2: version of python to use (ex. 3.13). uv downloads it if it isn't installed.
+    #     if not given, uses the newest python uv has installed, or downloads the latest.
+    # packages are installed with `uv pip install`, there is no pip inside the venv
 
     if [ -z "$1" ]; then
         echo "error: no environment name provided"
         return 1
     fi
+    if [[ "$1" == */* || "$1" == .* ]]; then
+        echo "error: give the environment name, not a path"
+        return 1
+    fi
 
-    path="$envdir/$1"
+    local path="$envdir/$1"
 
     if [ -d "$path" ]; then
         echo "error: environment already exists"
         return 1
     fi
 
-    if [ -z "$2" ]; then
-        current_version=$(python --version)
-        echo "no version specified, using current python version "$current_version" (y) ?"
-        read response
-        if [ "$response" == "y" ]; then
-            virtualenv "$path"
+    local version="$2" desc py
+    if [ -z "$version" ]; then
+        py=$(uv python find 2>/dev/null)
+        if [ -n "$py" ]; then
+            desc="$("$py" --version)"
         else
-            echo "rejected"
-            return 0
+            desc="latest python (will be downloaded)"
+        fi
+        echo "no version specified, using $desc (y) ?"
+    else
+        echo "create environment with python $version (y) ?"
+    fi
+    read response
+    if [ "$response" != "y" ]; then
+        echo "rejected"
+        return 0
+    fi
+
+    if [ -z "$version" ]; then
+        uv venv "$path" || return 1
+    else
+        uv venv --python "$version" "$path" || return 1
+    fi
+    echo "virtual environment created at $path"
+}
+
+upvenv() {
+    # rebuild a virtual environment in $envdir on another python version, keeping its packages
+    # $1: name of the environment
+    # $2: python version to move to (ex. 3.14)
+    # works on broken venvs too, since the package list is read straight from site-packages.
+    # the old venv is kept as <name>.old until the new one works.
+
+    if [ -z "$1" ] || [ -z "$2" ]; then
+        echo "usage: upvenv <name> <python_version>"
+        return 1
+    fi
+    if [[ "$1" == */* || "$1" == .* ]]; then
+        echo "error: give the environment name, not a path"
+        return 1
+    fi
+
+    local path="$envdir/$1"
+    local old="$path.old"
+
+    if [ ! -d "$path" ]; then
+        echo "error: environment not found"
+        return 1
+    fi
+    if [ "$VIRTUAL_ENV" == "$path" ]; then
+        echo "error: environment is active. deactivate first."
+        return 1
+    fi
+    if [ -e "$old" ]; then
+        echo "error: $old already exists. remove it first."
+        return 1
+    fi
+
+    # read name==version of every package in the old venv, skipping pip.
+    # uses uv's python since the venv's own python may be gone.
+    local reqs
+    reqs=$(mktemp --suffix=-"$1"-reqs.txt) || return 1
+    uv run --no-project --python "$2" python -I -c '
+import glob, sys, importlib.metadata as m
+paths = glob.glob(sys.argv[1] + "/lib/python*/site-packages")
+pkgs = {d.metadata["Name"]: d.version for d in m.distributions(path=paths)}
+for name in sorted(pkgs, key=str.lower):
+    if name.lower() != "pip":
+        print(f"{name}=={pkgs[name]}")
+' "$path" > "$reqs" || { echo "error: could not read packages"; return 1; }
+
+    echo "packages in $1 ($(wc -l < "$reqs")), saved to $reqs:"
+    tr '\n' ' ' < "$reqs"
+    echo
+    echo "rebuild $1 on python $2 (y) ?"
+    read response
+    if [ "$response" != "y" ]; then
+        echo "rejected"
+        return 0
+    fi
+
+    mv "$path" "$old" || return 1
+    if ! uv venv --python "$2" "$path"; then
+        echo "error: could not create venv, restoring old one"
+        command rm -rf -- "$path"
+        mv "$old" "$path"
+        return 1
+    fi
+
+    if [ -s "$reqs" ] && ! uv pip install --python "$path" -r "$reqs"; then
+        echo "install with pinned versions failed, retry with newest versions instead (y) ?"
+        read response
+        if [ "$response" != "y" ] || ! uv pip install --python "$path" -r <(sed 's/==.*//' "$reqs"); then
+            echo "error: install failed, restoring old venv"
+            command rm -rf -- "$path"
+            mv "$old" "$path"
+            return 1
+        fi
+    fi
+
+    echo "$1 rebuilt on python $2. delete old venv at $old (y) ?"
+    read response
+    if [ "$response" == "y" ]; then
+        if command rm -rf -- "$old"; then
+            echo "old venv deleted"
+        else
+            echo "error: could not fully delete $old. close anything still using it (ex. a running neovim) and remove it by hand"
         fi
     else
-        echo "create environment with python $2 (y) ?"
-        read response
-        if [ "$response" == "y" ]; then
-            python_path="$PYENV_ROOT/versions/$2/"
-            if [ -d "$python_path" ]; then
-                virtualenv -p "$python_path/bin/python" "$path"
-                echo "virtual environment created with version $2"
-                return 0
-            else
-                echo "version not found in pyenv directory, install with pyenv (y) ?"
-                read response
-                if [ "$response" == "y" ]; then
-                    pyenv install $2
-                    virtualenv -p "$python_path/bin/python" "$path"
-                    echo "virtual environment created with version $2"
-                else
-                    echo "rejected"
-                    return 0
-                fi
-            fi
-        else
-            echo "rejected"
-            return 0
-        fi
+        echo "kept old venv at $old"
     fi
 }
 
@@ -804,13 +870,26 @@ lsvenv() {
     fi
 
     echo "envs in $envdir:"
-    local env_path name version mark
+    local env_path name version mark linked
     for env_path in "$envdir"/*/; do
         [ -d "$env_path" ] || continue
         env_path="${env_path%/}"
         name="${env_path##*/}"
         if [ -f "$env_path/pyvenv.cfg" ]; then
-            version=$(sed -n 's/^version_info = \([0-9]*\.[0-9]*\.[0-9]*\).*/\1/p; s/^version = //p' "$env_path/pyvenv.cfg" | head -n 1)
+            # virtualenv writes 3.13.7.final.0, uv writes just 3.14
+            version=$(sed -n 's/^version_info = \([0-9]*\.[0-9]*\(\.[0-9]*\)\?\).*/\1/p; s/^version = //p' "$env_path/pyvenv.cfg" | head -n 1)
+            linked=$(readlink -f "$env_path/bin/python")
+            # uv pythons live in cpython-X.Y.Z-..., use that to show the full version
+            if [[ "$linked" =~ /cpython-([0-9]+\.[0-9]+\.[0-9]+)[^/]*/bin/ ]]; then
+                version="${BASH_REMATCH[1]}"
+            fi
+            # the python it links to is gone, or is now a different minor version
+            # (ex. /usr/bin/python moved 3.13 -> 3.14 in a system upgrade)
+            if [ ! -e "$linked" ]; then
+                version="$version (broken, python missing)"
+            elif [[ "${linked##*/}" == python3.* && "${linked##*/python}" != "$(cut -d. -f1-2 <<< "$version")" ]]; then
+                version="$version (broken, now runs ${linked##*/python})"
+            fi
         else
             version="(not a venv)"
         fi
@@ -847,8 +926,12 @@ rmvenv() {
     echo "delete environment at $path (y) ?"
     read response
     if [ "$response" == "y" ]; then
-        command rm -rf -- "$path"
-        echo "environment deleted"
+        if command rm -rf -- "$path"; then
+            echo "environment deleted"
+        else
+            echo "error: could not fully delete $path. close anything still using it (ex. a running neovim) and try again"
+            return 1
+        fi
     else
         echo "rejected"
         return 0

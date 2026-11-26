@@ -56,8 +56,7 @@ pacman -S gvim inetutils pv # vim-gtk3 instead of gvim for apt
 yay -S fastfetch
 
 # for python mkvenv utilities
-pacman -S python python-pip pyenv
-pip install --break-system-packages virtualenv
+pacman -S uv
 
 # for remote mounting
 pacman -S sshfs fusermount
@@ -86,6 +85,8 @@ here is a sample:
 fall_courses="/mnt/hdd2/study/bsc/y4/fall_courses"
 fall_taships="/mnt/hdd2/study/bsc/other/ta-ship/2025-2026/fall_taships"
 envdir="/mnt/hdd1/.envs/arch"
+uv_python_dir="/mnt/hdd1/.envs/arch/.python"
+uv_cache_dir="/mnt/hdd1/.envs/arch/.cache/uv"
 ```
 
 ## more tools i use
