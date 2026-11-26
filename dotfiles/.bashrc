@@ -207,6 +207,7 @@ mkvenv     : create new virtual environment with uv (usage: mkvenv <name> [pytho
 upvenv     : rebuild a venv on another python, keeping its packages (usage: upvenv <name> <python_version>)
 lsvenv     : list virtual environments in envdir with python versions
 rmvenv     : delete a virtual environment, asks first (usage: rmvenv <name>)
+regvenv    : register a venv as a jupyter kernel, needs ipykernel (usage: regvenv <name>)
 unset_venv : unset virtual environment variables
 
 === VIM/NEOVIM ===
@@ -936,6 +937,45 @@ rmvenv() {
         echo "rejected"
         return 0
     fi
+}
+
+regvenv() {
+    # register a virtual environment as a jupyter kernel (for molten, jupyter, etc.)
+    # $1: name of the environment, also used as the kernel name
+    # only registers if the venv's python runs and has ipykernel installed.
+    # writes ~/.local/share/jupyter/kernels/<name>/kernel.json, nothing is installed.
+    # running it again re-registers (ex. after upvenv), undo with: jupyter kernelspec uninstall <name>
+
+    if [ -z "$1" ]; then
+        echo "usage: regvenv <name>"
+        return 1
+    fi
+    if [[ "$1" == */* || "$1" == .* ]]; then
+        echo "error: give the environment name, not a path"
+        return 1
+    fi
+
+    local path="$envdir/$1"
+    local py="$path/bin/python"
+
+    if [ ! -d "$path" ]; then
+        echo "error: environment not found"
+        return 1
+    fi
+    if ! "$py" -c '' 2>/dev/null; then
+        echo "error: $py does not run (broken venv? see lsvenv)"
+        return 1
+    fi
+    if ! "$py" -c 'import ipykernel' 2>/dev/null; then
+        echo "error: ipykernel is not installed in $1. install it with:"
+        echo "  uv pip install --python $path ipykernel"
+        return 1
+    fi
+
+    local kernel_dir="$HOME/.local/share/jupyter/kernels/$1"
+    [ -d "$kernel_dir" ] && echo "kernel $1 already registered, updating it"
+
+    "$py" -m ipykernel install --user --name "$1" --display-name "$1" || return 1
 }
 
 unset_venv() {
