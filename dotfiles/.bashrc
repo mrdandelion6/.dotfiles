@@ -668,7 +668,12 @@ for l in lines[:${art_h}]:
 welcome() {
     if command -v fastfetch >/dev/null 2>&1; then
         echo; echo
-        fastfetch
+        if [ -n "$NVIM" ]; then
+            # nvim's number column eats a column, so draw one column narrower
+            fastfetch --logo-padding-right 3
+        else
+            fastfetch
+        fi
     elif [ -f "$CAT_ART_FILE" ]; then
         show_cat
     elif [ -f "$ascii_path$ascii_art" ]; then
