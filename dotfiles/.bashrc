@@ -664,16 +664,30 @@ for l in lines[:${art_h}]:
     echo
 }
 
+# fastfetch that fits the terminal width (e.g. an nvim terminal whose number column eats
+# a few columns). the box borders and the color dot rows are fixed width , so shrink them
+# when the terminal is too narrow. full size output is unchanged in wide terminals
+fastfetch_fit() {
+    local cfg=~/.config/fastfetch/config.jsonc
+    local avail=$(( $(tput cols) - 41 )) # info column starts at 41 (logo + padding)
+    local n=$(( (avail - 3) / 2 )) # dashes per half of a border , 30 at full size
+    (( n > 30 )) && n=30; (( n < 1 )) && n=1
+    local gap=$(( 5 - 2 * (30 - n) )) # middle gap of the color dot rows , 5 at full size
+    (( gap < 1 )) && gap=1
+    local dashes spaces tmp="${XDG_RUNTIME_DIR:-/tmp}/fastfetch-welcome.jsonc"
+    dashes=$(printf '%*s' $n '' | sed 's/ /─/g')
+    spaces=$(printf '%*s' $gap '')
+    sed -e "s/\"──────────────────────────────\"/\"$dashes\"/" \
+        -e "s/     {##/$spaces{##/g" "$cfg" > "$tmp"
+    # autowrap off so anything still too wide gets cut at the edge instead of wrapping
+    printf '\e[?7l'; fastfetch -c "$tmp"; printf '\e[?7h'
+}
+
 # print the welcome message , whether fastfetch or ascii art
 welcome() {
     if command -v fastfetch >/dev/null 2>&1; then
         echo; echo
-        if [ -n "$NVIM" ]; then
-            # nvim's number column eats a column, so draw one column narrower
-            fastfetch --logo-padding-right 3
-        else
-            fastfetch
-        fi
+        fastfetch_fit
     elif [ -f "$CAT_ART_FILE" ]; then
         show_cat
     elif [ -f "$ascii_path$ascii_art" ]; then
