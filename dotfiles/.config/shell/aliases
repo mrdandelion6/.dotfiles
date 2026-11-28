@@ -1,0 +1,25 @@
+# aliases shared by bash and fish. both shells source this file, so only use the
+# plain  alias name='command'  form, which both understand
+
+alias ls='ls --color=auto'
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+
+alias vi='vim'
+alias svi='sudoedit' # edit a root-owned file as yourself, with your own vim config
+
+alias ccc='claude -c' # claude code continue
+alias ccr='claude -r' # claude code resume
+
+# an alias, not a script: run_codex.sh calls `codex` itself, and a script named codex
+# in ~/.local/bin would end up calling itself forever
+alias codex='~/.dotfiles/dotfiles/.codex/run_codex.sh'
+
+# prompt modes (starship). hp: just "$ ". sp: short path, "[…/a/b] $ "
+alias hp='export STARSHIP_CONFIG=$HOME/.config/starship.toml; clear'
+alias sp='export STARSHIP_CONFIG=$HOME/.config/starship-path.toml'
+
+# 1080ti support babyy
+# NOTE: this is for my local PC. make sure you have cuda 12.9.1 and gcc14
+alias nv='nvcc -ccbin g++-14 -arch=sm_61 -Wno-deprecated-gpu-targets'

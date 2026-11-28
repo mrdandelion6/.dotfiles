@@ -1,0 +1,12 @@
+# default prompt: just "$ " in cyan, with "(venv) " in front when one is active.
+# this is what the old hide_path did. the sp alias switches to starship-path.toml, hp back here
+add_newline = false
+format = '$python[\$ ](cyan)'
+
+[python]
+# only show the active venv's name. no detect files, so it only appears when a venv is on
+format = '[(\($virtualenv\) )]($style)'
+style = 'white'
+detect_extensions = []
+detect_files = []
+detect_folders = []

@@ -1,0 +1,15 @@
+# short path prompt: "[…/a/b] $ ", like the old shorten_path. switch with sp, back with hp
+add_newline = false
+format = '$python$directory[\$ ](cyan)'
+
+[python]
+format = '[(\($virtualenv\) )]($style)'
+style = 'white'
+detect_extensions = []
+detect_files = []
+detect_folders = []
+
+[directory]
+format = '\[$path\] '
+truncation_length = 2
+truncation_symbol = '…/'

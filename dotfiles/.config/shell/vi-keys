@@ -1,0 +1,43 @@
+# vi normal-mode key table, shared by bash and fish.
+# each shell reads the rows for the layout in ~/.config/editor/layout (set with setc / setq)
+# and binds what it can. a '-' means that shell has no equivalent, so the key is left alone.
+#
+# columns:
+#   layout   key   bash readline function   fish bind function(s)
+#
+# fish column: several functions are separated by commas (they run in order).
+# mode:<name> switches fish to that vi mode (ex. mode:insert)
+
+# --- colemak-dh ---
+# movement: h j k l -> k n e i
+colemak  k  backward-char         backward-char
+colemak  n  next-history          down-or-search
+colemak  e  previous-history      up-or-search
+colemak  i  forward-char          forward-char
+colemak  K  backward-word         backward-word
+colemak  N  beginning-of-history  beginning-of-history
+colemak  E  end-of-history        end-of-history
+colemak  I  forward-word          forward-word
+# keys displaced by the movement keys
+colemak  h  vi-search-again       -
+colemak  j  vi-end-word           forward-single-char,forward-word,backward-char
+colemak  l  vi-insertion-mode     mode:insert
+colemak  H  vi-rev-repeat-search  -
+colemak  J  vi-end-word           forward-single-char,forward-bigword,backward-char
+colemak  L  vi-replace            mode:replace
+
+# --- qwerty ---
+qwerty   h  backward-char         backward-char
+qwerty   j  next-history          down-or-search
+qwerty   k  previous-history      up-or-search
+qwerty   l  forward-char          forward-char
+qwerty   H  backward-word         backward-word
+qwerty   J  beginning-of-history  beginning-of-history
+qwerty   K  end-of-history        end-of-history
+qwerty   L  forward-word          forward-word
+qwerty   n  vi-search-again       -
+qwerty   e  vi-end-word           forward-single-char,forward-word,backward-char
+qwerty   i  vi-insertion-mode     mode:insert
+qwerty   N  vi-rev-repeat-search  -
+qwerty   E  vi-end-word           forward-single-char,forward-bigword,backward-char
+qwerty   I  vi-replace            mode:replace
