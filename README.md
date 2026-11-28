@@ -58,6 +58,9 @@ yay -S fastfetch
 # for python mkvenv utilities
 pacman -S uv
 
+# interactive shell (.bashrc hands over to fish) and the prompt both shells share
+pacman -S fish starship
+
 # for remote mounting
 pacman -S sshfs fusermount
 
