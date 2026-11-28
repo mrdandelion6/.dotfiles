@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# pullall: pull master from all git remotes
+for remote in $(git remote); do
+    git pull "$remote" master
+done

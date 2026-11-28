@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# nt: neovim -> terminal
+# launch shortcuts: t = tmux, n = neovim, t (after n) = :term, c = claude
+exec nvim -c 'terminal' -c 'startinsert' "$@"

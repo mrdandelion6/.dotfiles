@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# upvenv: rebuild a virtual environment in $envdir on another python version, keeping its packages
+# usage: upvenv <name> <python_version>
+#   python_version: python version to move to (ex. 3.14)
+# works on broken venvs too, since the package list is read straight from site-packages.
+# the old venv is kept as <name>.old until the new one works.
+source "$(dirname "$(readlink -f "$0")")/../lib/common.sh"
+
+if [ -z "$1" ] || [ -z "$2" ]; then
+    echo "usage: upvenv <name> <python_version>"
+    exit 1
+fi
+check_env_name "$1"
+
+path="$envdir/$1"
+old="$path.old"
+
+[ -d "$path" ] || die "environment not found"
+[ "${VIRTUAL_ENV:-}" == "$path" ] && die "environment is active. deactivate first."
+[ -e "$old" ] && die "$old already exists. remove it first."
+
+# read name==version of every package in the old venv, skipping pip.
+# uses uv's python since the venv's own python may be gone.
+# site-packages is lib/pythonX.Y/site-packages on linux, Lib/site-packages on windows
+reqs=$(mktemp --suffix=-"$1"-reqs.txt) || exit 1
+uv run --no-project --python "$2" python -I -c '
+import glob, sys, importlib.metadata as m
+root = sys.argv[1]
+paths = glob.glob(root + "/lib/python*/site-packages") + glob.glob(root + "/Lib/site-packages")
+pkgs = {d.metadata["Name"]: d.version for d in m.distributions(path=paths)}
+for name in sorted(pkgs, key=str.lower):
+    if name.lower() != "pip":
+        print(f"{name}=={pkgs[name]}")
+' "$path" > "$reqs" || die "could not read packages"
+
+echo "packages in $1 ($(wc -l < "$reqs")), saved to $reqs:"
+tr '\n' ' ' < "$reqs"
+echo
+echo "rebuild $1 on python $2 (y) ?"
+read -r response
+if [ "$response" != "y" ]; then
+    echo "rejected"
+    exit 0
+fi
+
+mv "$path" "$old" || exit 1
+if ! uv venv --python "$2" "$path"; then
+    echo "error: could not create venv, restoring old one"
+    rm -rf -- "$path"
+    mv "$old" "$path"
+    exit 1
+fi
+
+if [ -s "$reqs" ] && ! uv pip install --python "$path" -r "$reqs"; then
+    echo "install with pinned versions failed, retry with newest versions instead (y) ?"
+    read -r response
+    # a real file, not <(...): windows uv can't open the /dev/fd path that makes
+    unpinned=$(mktemp --suffix=-"$1"-reqs-unpinned.txt) || exit 1
+    sed 's/==.*//' "$reqs" > "$unpinned"
+    if [ "$response" != "y" ] || ! uv pip install --python "$path" -r "$unpinned"; then
+        echo "error: install failed, restoring old venv"
+        rm -rf -- "$path"
+        mv "$old" "$path"
+        exit 1
+    fi
+fi
+
+echo "$1 rebuilt on python $2. delete old venv at $old (y) ?"
+read -r response
+if [ "$response" == "y" ]; then
+    if rm -rf -- "$old"; then
+        echo "old venv deleted"
+    else
+        echo "error: could not fully delete $old. close anything still using it (ex. a running neovim) and remove it by hand"
+    fi
+else
+    echo "kept old venv at $old"
+fi

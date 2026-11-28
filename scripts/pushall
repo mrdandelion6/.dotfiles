@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# pushall: push master to all git remotes
+for remote in $(git remote); do
+    git push "$remote" master
+done

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# tnt: tmux -> neovim -> terminal
+source "$(dirname "$(readlink -f "$0")")/../lib/common.sh"
+tmux_run "nt $*"

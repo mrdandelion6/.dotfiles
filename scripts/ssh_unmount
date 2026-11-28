@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# ssh_unmount: unmount an sshfs directory mounted with ssh_mount
+# usage: ssh_unmount <name>
+if [ ! -d ~/remote-mounts/"$1" ]; then
+    echo "no such folder ~/remote-mounts/$1"
+    exit 1
+fi
+fusermount -u ~/remote-mounts/"$1"

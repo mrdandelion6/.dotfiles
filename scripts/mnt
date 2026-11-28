@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# mnt: mount a device with user permissions (linux only)
+# usage: mnt [-t type] <device> <path>
+# type is auto-detected if not given
+type=""
+if [ "$1" = "-t" ]; then
+    type="$2"
+    shift 2
+fi
+
+if [ $# -ne 2 ]; then
+    echo "usage: mnt [-t type] /dev/sdXY /mnt/destination"
+    exit 1
+fi
+
+if [ ! -e "$1" ]; then
+    echo "device: $1 doesn't exist"
+    exit 1
+fi
+
+if [ ! -d "$2" ]; then
+    echo "path: $2 doesn't exist"
+    exit 1
+fi
+
+[ -z "$type" ] && type=$(lsblk -no FSTYPE "$1")
+
+# uid/gid only apply to filesystems without unix permissions
+case "$type" in
+    vfat|fat32|exfat|ntfs|ntfs3)
+        [ "$type" = "fat32" ] && type="vfat"
+        sudo mount -t "$type" -o uid="$(id -u)",gid="$(id -g)" "$1" "$2"
+        ;;
+    *)
+        sudo mount ${type:+-t "$type"} "$1" "$2"
+        ;;
+esac

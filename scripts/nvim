@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# nvim: run the real neovim with the "neovim" venv on PATH (for python plugins), if it exists
+#
+# the venv only needs to apply to the neovim process, not your shell, so this sets it up
+# here and then replaces itself with the real nvim. your shell's venv is left untouched
+source "$(dirname "$(readlink -f "$0")")/../lib/common.sh"
+
+venv="$envdir/neovim"
+if [ -d "$venv" ] && [ "${VIRTUAL_ENV:-}" != "$venv" ]; then
+    export VIRTUAL_ENV="$venv"
+    export PATH="$(venv_bin "$venv"):$PATH"
+fi
+
+# find the real nvim: the first one on PATH that isn't this script
+self=$(readlink -f "$0")
+IFS=: read -ra dirs <<< "$PATH"
+for dir in "${dirs[@]}"; do
+    candidate="$dir/nvim"
+    if [ -x "$candidate" ] && [ ! -d "$candidate" ] && [ "$(readlink -f "$candidate")" != "$self" ]; then
+        exec "$candidate" "$@"
+    fi
+done
+die "real nvim not found on PATH"

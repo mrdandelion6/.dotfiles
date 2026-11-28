@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# ntc: neovim -> terminal -> claude (quitting claude leaves you in the terminal)
+exec nvim -c 'terminal' \
+     -c 'call chansend(b:terminal_job_id, "claude\r")' \
+     -c 'startinsert' "$@"

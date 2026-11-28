@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# tntc: tmux -> neovim -> terminal -> claude
+source "$(dirname "$(readlink -f "$0")")/../lib/common.sh"
+tmux_run "ntc $*"

@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# regvenv: register a virtual environment as a jupyter kernel (for molten, jupyter, etc.)
+# usage: regvenv <name>
+#   name: the environment, also used as the kernel name
+# only registers if the venv's python runs and has ipykernel installed.
+# writes ~/.local/share/jupyter/kernels/<name>/kernel.json, nothing is installed.
+# running it again re-registers (ex. after upvenv), undo with: jupyter kernelspec uninstall <name>
+source "$(dirname "$(readlink -f "$0")")/../lib/common.sh"
+
+if [ -z "$1" ]; then
+    echo "usage: regvenv <name>"
+    exit 1
+fi
+check_env_name "$1"
+
+path="$envdir/$1"
+py="$(venv_bin "$path")/python"
+
+[ -d "$path" ] || die "environment not found"
+"$py" -c '' 2>/dev/null || die "$py does not run (broken venv? see lsvenv)"
+if ! "$py" -c 'import ipykernel' 2>/dev/null; then
+    echo "error: ipykernel is not installed in $1. install it with:"
+    echo "  uv pip install --python $path ipykernel"
+    exit 1
+fi
+
+kernel_dir="$HOME/.local/share/jupyter/kernels/$1"
+[ -d "$kernel_dir" ] && echo "kernel $1 already registered, updating it"
+
+"$py" -m ipykernel install --user --name "$1" --display-name "$1"

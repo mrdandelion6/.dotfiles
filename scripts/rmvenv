@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# rmvenv: delete a virtual environment from $envdir after confirmation
+# usage: rmvenv <name>
+source "$(dirname "$(readlink -f "$0")")/../lib/common.sh"
+
+check_env_name "$1"
+path="$envdir/$1"
+
+[ -d "$path" ] || die "environment not found"
+[ "${VIRTUAL_ENV:-}" == "$path" ] && die "environment is active. deactivate first."
+
+echo "delete environment at $path (y) ?"
+read -r response
+if [ "$response" != "y" ]; then
+    echo "rejected"
+    exit 0
+fi
+
+if rm -rf -- "$path"; then
+    echo "environment deleted"
+else
+    die "could not fully delete $path. close anything still using it (ex. a running neovim) and try again"
+fi

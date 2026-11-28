@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# notify_nvim: if this shell runs inside a neovim :terminal, tell neovim the current directory
+# (sends an OSC 51 escape sequence that the neovim config listens for).
+# the shells call this from a hook whenever the directory changes
+[ -n "${NVIM:-}" ] && printf '\033]51;%s\007' "$PWD"
+exit 0

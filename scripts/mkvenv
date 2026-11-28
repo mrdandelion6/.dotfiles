@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# mkvenv: create a virtual environment in $envdir with uv
+# usage: mkvenv <name> [python_version]
+#   python_version: ex. 3.13. uv downloads it if it isn't installed. if not given, uses
+#   the newest python uv has installed, or downloads the latest.
+# packages are installed with `uv pip install`, there is no pip inside the venv
+source "$(dirname "$(readlink -f "$0")")/../lib/common.sh"
+
+check_env_name "$1"
+path="$envdir/$1"
+[ -d "$path" ] && die "environment already exists"
+
+version="$2"
+if [ -z "$version" ]; then
+    py=$(uv python find 2>/dev/null)
+    if [ -n "$py" ]; then
+        desc="$("$py" --version)"
+    else
+        desc="latest python (will be downloaded)"
+    fi
+    echo "no version specified, using $desc (y) ?"
+else
+    echo "create environment with python $version (y) ?"
+fi
+read -r response
+if [ "$response" != "y" ]; then
+    echo "rejected"
+    exit 0
+fi
+
+if [ -z "$version" ]; then
+    uv venv "$path" || exit 1
+else
+    uv venv --python "$version" "$path" || exit 1
+fi
+echo "virtual environment created at $path"

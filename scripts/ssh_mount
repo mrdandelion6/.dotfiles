@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# ssh_mount: mount a remote directory with sshfs into ~/remote-mounts/<name>
+# usage: ssh_mount <user@address:path/to/dir> <name>
+# creates ~/remote-mounts/<name> if it doesn't exist
+if [ -z "$1" ] || [ -z "$2" ]; then
+    echo "usage: ssh_mount <user@address:path/to/dir> <name>"
+    exit 1
+fi
+mkdir -p ~/remote-mounts/"$2"
+sshfs "$1" ~/remote-mounts/"$2"

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# invenv: check if we are in a virtual environment
+if [ -z "${VIRTUAL_ENV:-}" ]; then
+    echo "not in a virtual environment"
+else
+    echo "in a virtual environment located at: $VIRTUAL_ENV"
+fi

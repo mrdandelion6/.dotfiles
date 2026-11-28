@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# als: list my custom commands, aliases, and variables (same list in bash and fish)
+cat <<'EOF'
+=== GENERAL ===
+als        : list all custom commands, aliases, and variables
+src        : reload the shell config (~/.bashrc or config.fish)
+vi         : alias for vim
+svi        : sudoedit, edit a root-owned file as yourself with your own vim config
+alert      : notify when long command finishes (usage: cmd; alert)
+
+=== DISPLAY & NAVIGATION ===
+hp         : prompt shows only $
+sp         : prompt shows a short path
+e          : zoxide jump
+welcome    : print welcome message with fastfetch/ascii art
+
+=== GIT ===
+pushall    : push master to all git remotes
+pullall    : pull master from all git remotes
+
+=== PYTHON ENVIRONMENT ===
+invenv     : check if in virtual environment
+actvenv    : activate virtual environment (usage: actvenv <name>)
+venvpath   : print a venv's bin folder (usage: venvpath <name>)
+mkvenv     : create new virtual environment with uv (usage: mkvenv <name> [python_version])
+upvenv     : rebuild a venv on another python, keeping its packages (usage: upvenv <name> <python_version>)
+lsvenv     : list virtual environments in envdir with python versions
+rmvenv     : delete a virtual environment, asks first (usage: rmvenv <name>)
+regvenv    : register a venv as a jupyter kernel, needs ipykernel (usage: regvenv <name>)
+
+=== VIM/NEOVIM ===
+setc       : set vim keybindings to colemak layout
+setq       : set vim keybindings to qwerty layout
+set_vim    : apply vim mode, key layout, and clipboard bindings
+nvim       : launch neovim with its venv
+tn         : tmux -> neovim
+tnt        : tmux -> neovim -> terminal
+tntc       : tmux -> neovim -> terminal -> claude
+nt         : neovim -> terminal
+ntc        : neovim -> terminal -> claude
+
+=== AI ===
+ccc        : claude --continue
+ccr        : claude --resume
+codex      : codex with my profile and vim layout
+
+=== MOUNTING & FILE SYSTEMS (linux) ===
+mnt             : mount with user permissions, auto-detects type (usage: mnt [-t type] <device> <path>)
+tar_all_dirs    : tar all directories in source to destination
+ssh_mount       : mount remote directory via sshfs (usage: ssh_mount <user@host:path> <name>)
+ssh_unmount     : unmount sshfs directory (usage: ssh_unmount <name>)
+
+=== IMPORTANT VARIABLES ===
+envdir          : path to python virtual environments
+uv_python_dir   : where uv installs python versions
+uv_cache_dir    : uv download cache, keep on the same drive as envdir
+NEOVIM_PATH     : path to neovim configuration
+is_arch         : true if running on Arch Linux
+is_msys         : true if running in MSYS2 on Windows
+NOFISH          : set to 1 to stay in bash instead of switching to fish (ex. NOFISH=1 bash)
+EOF
